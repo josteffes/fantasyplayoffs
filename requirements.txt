@@ -1,1 +1,7 @@
-
+streamlit
+pandas
+requests
+beautifulsoup4
+sleeper-wrapper
+streamlit-aggrid
+plotly
