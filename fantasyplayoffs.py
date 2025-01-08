@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from sleeper_wrapper import Stats, Players
-pip install openpyxl
 
 # Load data from uploaded files
 file_path = "PlayoffFantasy.xlsx"
