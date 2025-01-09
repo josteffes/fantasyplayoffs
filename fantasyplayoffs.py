@@ -44,7 +44,7 @@ for col in df_teams.columns:
     team_total = 0
     player_scores = []
     for player in team_players:
-        player_total = sum(scores_by_round[round_].get(player, 0))
+        player_total = sum(scores_by_round[round_].get(player, 0) * MULTIPLIERS[round_] for round_ in rounds)
         player_scores.append({"Player": player, "Score": player_total})
         team_total += player_total
     team_scores.append({"Team": col, "Total Score": team_total, "Players": player_scores})
