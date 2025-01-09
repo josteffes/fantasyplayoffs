@@ -32,7 +32,7 @@ def get_scores_for_round(season_type, year, week, player_list):
 rounds = ["Wildcard", "Divisional", "Conf_Champ", "Super_Bowl"]
 scores_by_round = {round_: get_scores_for_round("post", 2023, i + 1, df_teams.values.flatten()) for i, round_ in enumerate(rounds)}
 
-# Calculate total scores for each team and scores per round
+# Calculate scores for each team, including player-specific round scores
 team_scores = []
 round_scores = []
 for col in df_teams.columns:
@@ -42,13 +42,16 @@ for col in df_teams.columns:
     round_totals = {round_: 0 for round_ in rounds}
 
     for player in team_players:
-        player_total = sum((scores_by_round[round_].get(player, 0) or 0) * MULTIPLIERS[round_] for round_ in rounds)
-        player_scores.append({"Player": player, "Score": player_total})
-        team_total += player_total
-
-        # Calculate round-specific scores
+        player_total = 0
+        player_round_scores = {}
         for round_ in rounds:
-            round_totals[round_] += (scores_by_round[round_].get(player, 0) or 0) * MULTIPLIERS[round_]
+            score = (scores_by_round[round_].get(player, 0) or 0) * MULTIPLIERS[round_]
+            player_round_scores[round_] = score
+            player_total += score
+            round_totals[round_] += score
+
+        player_scores.append({"Player": player, **player_round_scores, "Total Score": player_total})
+        team_total += player_total
 
     team_scores.append({"Team": col, "Total Score": team_total, "Players": player_scores})
     round_scores.append({"Team": col, **round_totals, "Total": team_total})
@@ -57,14 +60,15 @@ for col in df_teams.columns:
 st.title("Fantasy Football Playoff League")
 
 # Create tabs
-tab1, tab2 = st.tabs(["Team Rosters & Scores", "Scores by Round"])
+tab1, tab2 = st.tabs(["Team Player Scores", "Scores by Round"])
 
-# Tab 1: Team Rosters & Scores
+# Tab 1: Team Player Scores
 with tab1:
+    st.subheader("Team Player Scores")
     for team in team_scores:
         st.subheader(f"Team: {team['Team']} (Total Score: {team['Total Score']})")
         player_df = pd.DataFrame(team["Players"])
-        st.dataframe(player_df.sort_values(by="Score", ascending=False))
+        st.dataframe(player_df)
 
 # Tab 2: Scores by Round
 with tab2:
