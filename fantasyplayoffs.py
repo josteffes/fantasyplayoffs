@@ -124,7 +124,7 @@ nfl_teams = [
 ]
 
 # Add a new tab for Scoring Settings
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Round Scores", "Player Leaderboard", "Team Details", "Current Game", "Scoring Settings"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Standings", "Player Scores", "Team Details", "Current Game", "Scoring Settings"])
 
 # Tab 1: Round Scores
 with tab1:
