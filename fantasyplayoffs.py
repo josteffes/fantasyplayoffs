@@ -318,11 +318,21 @@ with tab5:
 with tab6:
     st.subheader("Player Selections")
 
-    # Count how many teams selected each player
+    # Count how many teams selected each player and track selecting team
     player_selection_counts = []
+    player_selected_by = {}  # Dictionary to track which team selected the player
+
     for player in unique_players:
-        count = sum(player == p["Player"] for team in team_scores for p in team["Players"])
+        count = 0
+        selected_by = []
+        for team in team_scores:
+            for p in team["Players"]:
+                if player == p["Player"]:
+                    count += 1
+                    selected_by.append(team["Team"])
         player_selection_counts.append({"Player": player, "Selections": count})
+        if count == 1:  # Track the team if the player is selected only once
+            player_selected_by[player] = selected_by[0] if selected_by else "Unknown"
 
     # Create a DataFrame and sort by selections
     selections_df = pd.DataFrame(player_selection_counts)
@@ -335,5 +345,7 @@ with tab6:
 
     # Least Selected Players (All with 1 Selection)
     st.markdown("### Least Selected Players (Selected Once)")
-    least_selected_df = selections_df[selections_df["Selections"] == 1].set_index("Player")
+    least_selected_df = selections_df[selections_df["Selections"] == 1]
+    least_selected_df["Selected By"] = least_selected_df["Player"].map(player_selected_by)
+    least_selected_df = least_selected_df.set_index("Player")
     st.table(least_selected_df)
