@@ -53,8 +53,12 @@ for col in df_teams.columns:
         player_scores.append({"Player": player, **player_round_scores, "Total Score": player_total})
         team_total += player_total
 
-    team_scores.append({"Team": col, "Total Score": team_total, "Players": player_scores})
-    round_scores.append({"Team": col, **round_totals, "Total": team_total})
+    team_scores.append({"Team": col, "Total Score": round(team_total, 2), "Players": player_scores})
+    round_scores.append({"Team": col, **round_totals, "Total": round(team_total, 2)})
+
+# Sort teams by total score
+team_scores = sorted(team_scores, key=lambda x: x["Total Score"], reverse=True)
+round_scores = sorted(round_scores, key=lambda x: x["Total"], reverse=True)
 
 # Streamlit App
 st.title("Fantasy Football Playoff League")
@@ -67,11 +71,11 @@ with tab1:
     st.subheader("Team Player Scores")
     for team in team_scores:
         st.subheader(f"Team: {team['Team']} (Total Score: {team['Total Score']})")
-        player_df = pd.DataFrame(team["Players"])
+        player_df = pd.DataFrame(team["Players"]).set_index("Player")
         st.dataframe(player_df)
 
 # Tab 2: Scores by Round
 with tab2:
     st.subheader("Scores by Round")
-    round_scores_df = pd.DataFrame(round_scores)
+    round_scores_df = pd.DataFrame(round_scores).set_index("Team")
     st.dataframe(round_scores_df)
