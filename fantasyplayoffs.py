@@ -201,6 +201,9 @@ with tab3:
         # Display the sorted dataframe
         st.dataframe(player_df)
 
+# Extract the set of NFL teams dynamically
+nfl_teams = sorted(df_name_mapping["Team"].unique())
+
 # Tab 4: Current NFL Game
 with tab4:
     st.subheader("Current NFL Game Focus")
@@ -223,11 +226,11 @@ with tab4:
 
             # Find the player from each NFL team for the current fantasy team
             team1_player = next(
-                (p for p in players if selected_team1 == df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0]),
+                (p for p in players if df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0] == selected_team1),
                 None
             )
             team2_player = next(
-                (p for p in players if selected_team2 == df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0]),
+                (p for p in players if df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0] == selected_team2),
                 None
             )
 
