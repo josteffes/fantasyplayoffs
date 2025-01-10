@@ -251,6 +251,6 @@ with tab4:
         current_game_df = pd.DataFrame(current_game_data)
         # Sort by Total in descending order
         current_game_df = current_game_df.sort_values(by="Total", ascending=False)
-        # Set Total as the index
-        current_game_df = current_game_df.set_index("Total")
+        # Set Name as the index
+        current_game_df = current_game_df.set_index("Name")
         st.dataframe(current_game_df)
