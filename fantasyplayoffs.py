@@ -139,12 +139,19 @@ with tab1:
 
     selected_round = st.selectbox("Select the current round:", rounds, index=0)
 
+    # Ensure consistent formatting
+    df_name_mapping["Name"] = df_name_mapping["Name"].str.strip().str.lower()
+
     # Filter data for the selected teams and round
     if selected_team1 and selected_team2:
         current_game_data = []
         for team in team_scores:
             team_name = team["Team"]
             players = team["Players"]
+
+            # Ensure Player names are consistent
+            for player in players:
+                player["Player"] = player["Player"].strip().lower()
 
             # Find the player from each NFL team for the current fantasy team
             team1_player = next(
@@ -168,8 +175,8 @@ with tab1:
                 "Total": team["Total Score"],
                 "Name": team_name,
                 "CurrGame": curr_game_score,
-                selected_team1: team1_player["Player"] if team1_player else "None",
-                selected_team2: team2_player["Player"] if team2_player else "None",
+                selected_team1: team1_player["Player"].title() if team1_player else "None",
+                selected_team2: team2_player["Player"].title() if team2_player else "None",
             })
 
         # Create and display the dataframe
