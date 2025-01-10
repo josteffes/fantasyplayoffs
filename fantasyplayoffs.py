@@ -321,7 +321,7 @@ with tab6:
     # Count how many teams selected each player
     player_selection_counts = []
     for player in unique_players:
-        count = sum(player["Player"] == player_name for team in team_scores for player_name in team["Players"])
+        count = sum(player == p["Player"] for team in team_scores for p in team["Players"])
         player_selection_counts.append({"Player": player, "Selections": count})
 
     # Create a DataFrame and sort by selections
