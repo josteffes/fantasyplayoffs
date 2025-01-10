@@ -208,9 +208,9 @@ with tab4:
     # Dropdown inputs for NFL teams and round
     col1, col2 = st.columns(2)
     with col1:
-        selected_team1 = st.selectbox("Select the first NFL team:", nfl_teams)
+        selected_team1 = st.selectbox("Select the first NFL team:", sorted(df_name_mapping["Team"].unique()))
     with col2:
-        selected_team2 = st.selectbox("Select the second NFL team:", nfl_teams)
+        selected_team2 = st.selectbox("Select the second NFL team:", sorted(df_name_mapping["Team"].unique()))
 
     selected_round = st.selectbox("Select the current round:", rounds, index=0)
 
@@ -223,11 +223,11 @@ with tab4:
 
             # Find the player from each NFL team for the current fantasy team
             team1_player = next(
-                (p for p in players if df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0] == selected_team1),
+                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team1]["Name"].values),
                 None
             )
             team2_player = next(
-                (p for p in players if df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0] == selected_team2),
+                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team2]["Name"].values),
                 None
             )
 
@@ -240,9 +240,9 @@ with tab4:
 
             # Add data to the table
             current_game_data.append({
+                "Total": team["Total Score"],
                 "Name": team_name,
                 "CurrGame": curr_game_score,
-                "Total": team["Total Score"],
                 selected_team1: team1_player["Player"] if team1_player else "None",
                 selected_team2: team2_player["Player"] if team2_player else "None",
             })
@@ -251,6 +251,6 @@ with tab4:
         current_game_df = pd.DataFrame(current_game_data)
         # Sort by Total in descending order
         current_game_df = current_game_df.sort_values(by="Total", ascending=False)
-        # Set Name as the index
-        current_game_df = current_game_df.set_index("Name")
+        # Set Total as the index
+        current_game_df = current_game_df.set_index("Total")
         st.dataframe(current_game_df)
