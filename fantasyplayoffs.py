@@ -147,9 +147,9 @@ with tab1:
     round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
     st.dataframe(round_scores_df)
 
-# Tab 2: Player Leaderboard
+# Tab 2: Player Scores
 with tab2:
-    st.subheader("Player Leaderboard")
+    st.subheader("Player Scores")
 
     # Get a list of all unique players across all teams
     all_players = []
@@ -157,11 +157,13 @@ with tab2:
         all_players.extend([player["Player"] for player in team["Players"]])
     unique_players = list(set(all_players))
 
-    # Create a leaderboard with scores by round and total
+    # Create a leaderboard with scores by round, total, and team
     player_leaderboard = []
     for player in unique_players:
         player_scores = {
             "Player": player,
+            "Team": df_name_mapping[df_name_mapping["Name"] == player]["Team"].iloc[0]
+            if player in df_name_mapping["Name"].values else "Unknown",
             **{
                 round_: (scores_by_round[round_].get(player, 0) or 0) * MULTIPLIERS[round_]
                 for round_ in rounds
@@ -173,7 +175,7 @@ with tab2:
     # Create and display player leaderboard dataframe
     leaderboard_df = pd.DataFrame(player_leaderboard)
     leaderboard_df = leaderboard_df.sort_values(by="Total", ascending=False)
-    leaderboard_df = leaderboard_df.set_index("Player")
+    leaderboard_df = leaderboard_df[["Player", "Team", "Wildcard", "Divisional", "Conf_Champ", "Super_Bowl", "Total"]]
     st.dataframe(leaderboard_df)
 
 # Tab 3: Team Details
