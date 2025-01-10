@@ -126,29 +126,23 @@ with tab1:
     # Sort teams by total score in descending order
     sorted_teams = sorted(team_scores, key=lambda x: x["Total Score"], reverse=True)
 
-    # Display 3 teams per row
-    num_teams = len(sorted_teams)
-    for i in range(0, num_teams, 3):
-        cols = st.columns(3)  # Create 3 columns
-        for j, col in enumerate(cols):
-            if i + j < num_teams:  # Check if there are teams left to display
-                team = sorted_teams[i + j]
-                with col:
-                    st.subheader(f"Team: {team['Team']} (Total Score: {team['Total Score']:.2f})")
+    # Display each team's table in its own row
+    for team in sorted_teams:
+        st.subheader(f"Team: {team['Team']} (Total Score: {team['Total Score']:.2f})")
 
-                    # Add position column and fetch player positions
-                    player_df = pd.DataFrame(team["Players"])
-                    player_df["Position"] = player_df["Player"].apply(get_player_position)
+        # Add position column and fetch player positions
+        player_df = pd.DataFrame(team["Players"])
+        player_df["Position"] = player_df["Player"].apply(get_player_position)
 
-                    # Sort by position and set index
-                    player_df["Position_Rank"] = player_df["Position"].apply(
-                        lambda x: POSITION_SORT_ORDER.index(x) if x in POSITION_SORT_ORDER else len(POSITION_SORT_ORDER)
-                    )
-                    player_df = player_df.sort_values(by=["Position_Rank", "Player"]).drop(columns=["Position_Rank"])
-                    player_df = player_df.set_index("Position")
+        # Sort by position and set index
+        player_df["Position_Rank"] = player_df["Position"].apply(
+            lambda x: POSITION_SORT_ORDER.index(x) if x in POSITION_SORT_ORDER else len(POSITION_SORT_ORDER)
+        )
+        player_df = player_df.sort_values(by=["Position_Rank", "Player"]).drop(columns=["Position_Rank"])
+        player_df = player_df.set_index("Position")
 
-                    # Display the sorted dataframe
-                    st.dataframe(player_df)
+        # Display the sorted dataframe
+        st.dataframe(player_df)
 
 # Tab 2: Team round scores summary
 with tab2:
