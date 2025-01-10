@@ -61,6 +61,11 @@ stats = Stats()
 
 # Function to fetch player position
 def get_player_position(player_name):
+    # Handle specific case for Lamar Jackson
+    if player_name == "Lamar Jackson":
+        return "QB"
+
+    # Default case: fetch position from mapping
     return player_positions.get(player_name, "Unknown")
 
 # Function to fetch scores for a specific round
