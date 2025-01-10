@@ -347,5 +347,5 @@ with tab6:
     st.markdown("### Least Selected Players (Selected Once)")
     least_selected_df = selections_df[selections_df["Selections"] == 1]
     least_selected_df["Selected By"] = least_selected_df["Player"].map(player_selected_by)
-    least_selected_df = least_selected_df.set_index("Player")
+    least_selected_df = least_selected_df[["Player", "Selected By"]].set_index("Player")  # Remove "Selections" column
     st.table(least_selected_df)
