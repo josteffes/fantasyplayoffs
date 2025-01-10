@@ -124,71 +124,10 @@ nfl_teams = [
 ]
 
 # Tab Layout
-tab1, tab2, tab3, tab4 = st.tabs(["Current Game", "Round Scores", "Player Leaderboard", "Team Details"])
+tab1, tab2, tab3, tab4 = st.tabs(["Round Scores", "Player Leaderboard", "Team Details", "Current Game"])
 
-# Tab 1: Current NFL Game
+# Tab 1: Round Scores
 with tab1:
-    st.subheader("Current NFL Game Focus")
-
-    # Dropdown inputs for NFL teams and round
-    col1, col2 = st.columns(2)
-    with col1:
-        selected_team1 = st.selectbox("Select the first NFL team:", nfl_teams)
-    with col2:
-        selected_team2 = st.selectbox("Select the second NFL team:", nfl_teams)
-
-    selected_round = st.selectbox("Select the current round:", rounds, index=0)
-
-    # Ensure consistent formatting
-    df_name_mapping["Name"] = df_name_mapping["Name"].str.strip().str.lower()
-
-    # Filter data for the selected teams and round
-    if selected_team1 and selected_team2:
-        current_game_data = []
-        for team in team_scores:
-            team_name = team["Team"]
-            players = team["Players"]
-
-            # Ensure Player names are consistent
-            for player in players:
-                player["Player"] = player["Player"].strip().lower()
-
-            # Find the player from each NFL team for the current fantasy team
-            team1_player = next(
-                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team1]["Name"].values),
-                None
-            )
-            team2_player = next(
-                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team2]["Name"].values),
-                None
-            )
-
-            # Calculate current game score
-            curr_game_score = 0
-            if team1_player:
-                curr_game_score += (scores_by_round[selected_round].get(team1_player["Player"], 0) or 0) * MULTIPLIERS[selected_round]
-            if team2_player:
-                curr_game_score += (scores_by_round[selected_round].get(team2_player["Player"], 0) or 0) * MULTIPLIERS[selected_round]
-
-            # Add data to the table
-            current_game_data.append({
-                "Total": team["Total Score"],
-                "Name": team_name,
-                "CurrGame": curr_game_score,
-                selected_team1: team1_player["Player"].title() if team1_player else "None",
-                selected_team2: team2_player["Player"].title() if team2_player else "None",
-            })
-
-        # Create and display the dataframe
-        current_game_df = pd.DataFrame(current_game_data)
-        # Sort by Total in descending order
-        current_game_df = current_game_df.sort_values(by="Total", ascending=False)
-        # Set Total as the index
-        current_game_df = current_game_df.set_index("Total")
-        st.dataframe(current_game_df)
-
-# Tab 2: Team Round Scores (formerly Tab 1)
-with tab2:
     st.subheader("Team Round Scores")
     round_scores = []
     for team in team_scores:
@@ -208,8 +147,8 @@ with tab2:
     round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
     st.dataframe(round_scores_df)
 
-# Tab 3: Player Leaderboard (formerly Tab 2)
-with tab3:
+# Tab 2: Player Leaderboard
+with tab2:
     st.subheader("Player Leaderboard")
 
     # Get a list of all unique players across all teams
@@ -237,8 +176,8 @@ with tab3:
     leaderboard_df = leaderboard_df.set_index("Player")
     st.dataframe(leaderboard_df)
 
-# Tab 4: Team Details (formerly Tab 3)
-with tab4:
+# Tab 3: Team Details
+with tab3:
     st.subheader("Team Player Scores")
 
     # Sort teams by total score in descending order
@@ -261,3 +200,57 @@ with tab4:
 
         # Display the sorted dataframe
         st.dataframe(player_df)
+
+# Tab 4: Current NFL Game
+with tab4:
+    st.subheader("Current NFL Game Focus")
+
+    # Dropdown inputs for NFL teams and round
+    col1, col2 = st.columns(2)
+    with col1:
+        selected_team1 = st.selectbox("Select the first NFL team:", nfl_teams)
+    with col2:
+        selected_team2 = st.selectbox("Select the second NFL team:", nfl_teams)
+
+    selected_round = st.selectbox("Select the current round:", rounds, index=0)
+
+    # Filter data for the selected teams and round
+    if selected_team1 and selected_team2:
+        current_game_data = []
+        for team in team_scores:
+            team_name = team["Team"]
+            players = team["Players"]
+
+            # Find the player from each NFL team for the current fantasy team
+            team1_player = next(
+                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team1]["Name"].values),
+                None
+            )
+            team2_player = next(
+                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team2]["Name"].values),
+                None
+            )
+
+            # Calculate current game score
+            curr_game_score = 0
+            if team1_player:
+                curr_game_score += (scores_by_round[selected_round].get(team1_player["Player"], 0) or 0) * MULTIPLIERS[selected_round]
+            if team2_player:
+                curr_game_score += (scores_by_round[selected_round].get(team2_player["Player"], 0) or 0) * MULTIPLIERS[selected_round]
+
+            # Add data to the table
+            current_game_data.append({
+                "Total": team["Total Score"],
+                "Name": team_name,
+                "CurrGame": curr_game_score,
+                selected_team1: team1_player["Player"] if team1_player else "None",
+                selected_team2: team2_player["Player"] if team2_player else "None",
+            })
+
+        # Create and display the dataframe
+        current_game_df = pd.DataFrame(current_game_data)
+        # Sort by Total in descending order
+        current_game_df = current_game_df.sort_values(by="Total", ascending=False)
+        # Set Total as the index
+        current_game_df = current_game_df.set_index("Total")
+        st.dataframe(current_game_df)
