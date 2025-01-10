@@ -124,7 +124,7 @@ nfl_teams = [
 ]
 
 # Add a new tab for Scoring Settings
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Standings", "Player Scores", "Team Details", "Current Game", "Scoring Settings"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Standings", "Player Scores", "Team Details", "Current Game", "Scoring Settings", "Player Selections"])
 
 # Tab 1: Round Scores
 with tab1:
@@ -313,3 +313,27 @@ with tab5:
     st.markdown("### Defense/Special Teams Scoring")
     defense_df = pd.DataFrame(list(defense_scoring.items()), columns=["Action", "Points"]).set_index("Action")
     st.table(defense_df)
+
+# Tab 6: Player Selections
+with tab6:
+    st.subheader("Player Selections")
+
+    # Count how many teams selected each player
+    player_selection_counts = []
+    for player in unique_players:
+        count = sum(player["Player"] == player_name for team in team_scores for player_name in team["Players"])
+        player_selection_counts.append({"Player": player, "Selections": count})
+
+    # Create a DataFrame and sort by selections
+    selections_df = pd.DataFrame(player_selection_counts)
+    selections_df = selections_df.sort_values(by="Selections", ascending=False)
+
+    # Most Selected Players (Top 10)
+    st.markdown("### Most Selected Players")
+    most_selected_df = selections_df.head(10).set_index("Player")
+    st.table(most_selected_df)
+
+    # Least Selected Players (Bottom 10)
+    st.markdown("### Least Selected Players")
+    least_selected_df = selections_df.tail(10).set_index("Player")
+    st.table(least_selected_df)
