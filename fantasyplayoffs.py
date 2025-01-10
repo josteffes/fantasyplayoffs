@@ -117,10 +117,32 @@ POSITION_SORT_ORDER = ["QB", "RB", "WR", "TE", "Flex", "DEF", "K"]
 # Streamlit App
 st.title("Fantasy Football Playoff League")
 
-tab1, tab2 = st.tabs(["Team Details", "Round Scores"])
+# Tab Layout
+tab1, tab2, tab3 = st.tabs(["Round Scores", "Team Details", "Player Leaderboard"])
 
-# Tab 1: Team Player Scores
+# Tab 1: Team Round Scores (previously Tab 2)
 with tab1:
+    st.subheader("Team Round Scores")
+    round_scores = []
+    for team in team_scores:
+        team_data = {
+            "Team": team["Team"],
+            **{
+                round_: sum(player[round_] for player in team["Players"])
+                for round_ in rounds
+            },
+            "Total": team["Total Score"]
+        }
+        round_scores.append(team_data)
+
+    # Create and display round scores dataframe
+    round_scores_df = pd.DataFrame(round_scores)
+    round_scores_df = round_scores_df.set_index("Team")
+    round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
+    st.dataframe(round_scores_df)
+
+# Tab 2: Team Details (previously Tab 1)
+with tab2:
     st.subheader("Team Player Scores")
 
     # Sort teams by total score in descending order
@@ -144,23 +166,31 @@ with tab1:
         # Display the sorted dataframe
         st.dataframe(player_df)
 
-# Tab 2: Team round scores summary
-with tab2:
-    st.subheader("Team Round Scores")
-    round_scores = []
-    for team in team_scores:
-        team_data = {
-            "Team": team["Team"],
-            **{
-                round_: sum(player[round_] for player in team["Players"])
-                for round_ in rounds
-            },
-            "Total": team["Total Score"]
-        }
-        round_scores.append(team_data)
+# Tab 3: Player Leaderboard
+with tab3:
+    st.subheader("Player Leaderboard")
 
-    # Create and display round scores dataframe
-    round_scores_df = pd.DataFrame(round_scores)
-    round_scores_df = round_scores_df.set_index("Team")
-    round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
-    st.dataframe(round_scores_df)
+    # Get a list of all unique players across all teams
+    all_players = []
+    for team in team_scores:
+        all_players.extend([player["Player"] for player in team["Players"]])
+    unique_players = list(set(all_players))
+
+    # Create a leaderboard with scores by round and total
+    player_leaderboard = []
+    for player in unique_players:
+        player_scores = {
+            "Player": player,
+            **{
+                round_: (scores_by_round[round_].get(player, 0) or 0) * MULTIPLIERS[round_]
+                for round_ in rounds
+            }
+        }
+        player_scores["Total"] = sum(player_scores[round_] for round_ in rounds)
+        player_leaderboard.append(player_scores)
+
+    # Create and display player leaderboard dataframe
+    leaderboard_df = pd.DataFrame(player_leaderboard)
+    leaderboard_df = leaderboard_df.sort_values(by="Total", ascending=False)
+    leaderboard_df = leaderboard_df.set_index("Player")
+    st.dataframe(leaderboard_df)
