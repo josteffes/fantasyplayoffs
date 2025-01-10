@@ -221,16 +221,13 @@ with tab4:
             team_name = team["Team"]
             players = team["Players"]
 
-            # Debugging: Print df_name_mapping columns
-            st.write("Name Mapping Columns:", df_name_mapping.columns.tolist())
-
             # Find the player from each NFL team for the current fantasy team
             team1_player = next(
-                (p for p in players if selected_team1 in df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values),
+                (p for p in players if selected_team1 == df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0]),
                 None
             )
             team2_player = next(
-                (p for p in players if selected_team2 in df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values),
+                (p for p in players if selected_team2 == df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0]),
                 None
             )
 
