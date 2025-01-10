@@ -223,11 +223,11 @@ with tab4:
 
             # Find the player from each NFL team for the current fantasy team
             team1_player = next(
-                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team1]["Name"].values),
+                (p for p in players if df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0] == selected_team1),
                 None
             )
             team2_player = next(
-                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team2]["Name"].values),
+                (p for p in players if df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0] == selected_team2),
                 None
             )
 
@@ -240,9 +240,9 @@ with tab4:
 
             # Add data to the table
             current_game_data.append({
-                "Total": team["Total Score"],
                 "Name": team_name,
                 "CurrGame": curr_game_score,
+                "Total": team["Total Score"],
                 selected_team1: team1_player["Player"] if team1_player else "None",
                 selected_team2: team2_player["Player"] if team2_player else "None",
             })
