@@ -346,11 +346,11 @@ with tab6:
     # Most Selected Players (Top 10)
     st.markdown("### Most Selected Players")
     most_selected_df = selections_df.head(10)[["Player", "NFL Team", "Selections"]].set_index("Player")
-    st.table(most_selected_df)
+    st.dataframe(most_selected_df)
 
     # Least Selected Players (All with 1 Selection)
     st.markdown("### Least Selected Players (Selected Once)")
     least_selected_df = selections_df[selections_df["Selections"] == 1]
     least_selected_df["Selected By"] = least_selected_df["Player"].map(player_selected_by)
     least_selected_df = least_selected_df[["Player", "NFL Team", "Selected By"]].set_index("Player")
-    st.table(least_selected_df)
+    st.dataframe(least_selected_df)
