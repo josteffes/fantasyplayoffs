@@ -117,8 +117,14 @@ POSITION_SORT_ORDER = ["QB", "RB", "WR", "TE", "Flex", "DEF", "K"]
 # Streamlit App
 st.title("Fantasy Football Playoff League")
 
+# Define the 14 NFL Playoff Teams
+nfl_teams = [
+    "SF", "KC", "PHI", "BUF", "CIN", "DAL", "JAX", "NYG", "LAC",
+    "BAL", "MIN", "TB", "SEA", "MIA"
+]
+
 # Tab Layout
-tab1, tab2, tab3 = st.tabs(["Round Scores", "Player Leaderboard", "Team Details"])
+tab1, tab2, tab3, tab4 = st.tabs(["Round Scores", "Player Leaderboard", "Team Details", "Current Game"])
 
 # Tab 1: Team Round Scores
 with tab1:
@@ -141,7 +147,7 @@ with tab1:
     round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
     st.dataframe(round_scores_df)
 
-# Tab 2: Player Leaderboard (previously Tab 3)
+# Tab 2: Player Leaderboard
 with tab2:
     st.subheader("Player Leaderboard")
 
@@ -170,7 +176,7 @@ with tab2:
     leaderboard_df = leaderboard_df.set_index("Player")
     st.dataframe(leaderboard_df)
 
-# Tab 3: Team Details (previously Tab 2)
+# Tab 3: Team Details
 with tab3:
     st.subheader("Team Player Scores")
 
@@ -196,15 +202,15 @@ with tab3:
         st.dataframe(player_df)
 
 # Tab 4: Current NFL Game
-with st.tabs(["Round Scores", "Player Leaderboard", "Team Details", "Current Game"])[3]:
+with tab4:
     st.subheader("Current NFL Game Focus")
 
-    # Inputs for the current game
+    # Dropdown inputs for NFL teams and round
     col1, col2 = st.columns(2)
     with col1:
-        selected_team1 = st.text_input("Enter the first NFL team (e.g., SF for 49ers):", "")
+        selected_team1 = st.selectbox("Select the first NFL team:", nfl_teams)
     with col2:
-        selected_team2 = st.text_input("Enter the second NFL team (e.g., KC for Chiefs):", "")
+        selected_team2 = st.selectbox("Select the second NFL team:", nfl_teams)
 
     selected_round = st.selectbox("Select the current round:", rounds, index=0)
 
@@ -216,8 +222,14 @@ with st.tabs(["Round Scores", "Player Leaderboard", "Team Details", "Current Gam
             players = team["Players"]
 
             # Find the player from each NFL team for the current fantasy team
-            team1_player = next((p for p in players if selected_team1 in df_name_mapping[df_name_mapping['Player'] == p['Player']]['Team'].values), None)
-            team2_player = next((p for p in players if selected_team2 in df_name_mapping[df_name_mapping['Player'] == p['Player']]['Team'].values), None)
+            team1_player = next(
+                (p for p in players if df_name_mapping[df_name_mapping["Player"] == p["Player"]]["Team"].values[0] == selected_team1),
+                None
+            )
+            team2_player = next(
+                (p for p in players if df_name_mapping[df_name_mapping["Player"] == p["Player"]]["Team"].values[0] == selected_team2),
+                None
+            )
 
             # Calculate current game score
             curr_game_score = 0
