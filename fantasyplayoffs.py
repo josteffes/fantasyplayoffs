@@ -126,7 +126,7 @@ nfl_teams = [
 # Tab Layout
 tab1, tab2, tab3, tab4 = st.tabs(["Current Game", "Round Scores", "Player Leaderboard", "Team Details"])
 
-# Tab 1: Current NFL Game (formerly Tab 4)
+# Tab 1: Current NFL Game
 with tab1:
     st.subheader("Current NFL Game Focus")
 
@@ -148,11 +148,11 @@ with tab1:
 
             # Find the player from each NFL team for the current fantasy team
             team1_player = next(
-                (p for p in players if df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0] == selected_team1),
+                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team1]["Name"].values),
                 None
             )
             team2_player = next(
-                (p for p in players if df_name_mapping[df_name_mapping["Name"] == p["Player"]]["Team"].values[0] == selected_team2),
+                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team2]["Name"].values),
                 None
             )
 
@@ -165,9 +165,9 @@ with tab1:
 
             # Add data to the table
             current_game_data.append({
+                "Total": team["Total Score"],
                 "Name": team_name,
                 "CurrGame": curr_game_score,
-                "Total": team["Total Score"],
                 selected_team1: team1_player["Player"] if team1_player else "None",
                 selected_team2: team2_player["Player"] if team2_player else "None",
             })
