@@ -124,88 +124,10 @@ nfl_teams = [
 ]
 
 # Tab Layout
-tab1, tab2, tab3, tab4 = st.tabs(["Round Scores", "Player Leaderboard", "Team Details", "Current Game"])
+tab1, tab2, tab3, tab4 = st.tabs(["Current Game", "Round Scores", "Player Leaderboard", "Team Details"])
 
-# Tab 1: Team Round Scores
+# Tab 1: Current NFL Game (formerly Tab 4)
 with tab1:
-    st.subheader("Team Round Scores")
-    round_scores = []
-    for team in team_scores:
-        team_data = {
-            "Team": team["Team"],
-            **{
-                round_: sum(player[round_] for player in team["Players"])
-                for round_ in rounds
-            },
-            "Total": team["Total Score"]
-        }
-        round_scores.append(team_data)
-
-    # Create and display round scores dataframe
-    round_scores_df = pd.DataFrame(round_scores)
-    round_scores_df = round_scores_df.set_index("Team")
-    round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
-    st.dataframe(round_scores_df)
-
-# Tab 2: Player Leaderboard
-with tab2:
-    st.subheader("Player Leaderboard")
-
-    # Get a list of all unique players across all teams
-    all_players = []
-    for team in team_scores:
-        all_players.extend([player["Player"] for player in team["Players"]])
-    unique_players = list(set(all_players))
-
-    # Create a leaderboard with scores by round and total
-    player_leaderboard = []
-    for player in unique_players:
-        player_scores = {
-            "Player": player,
-            **{
-                round_: (scores_by_round[round_].get(player, 0) or 0) * MULTIPLIERS[round_]
-                for round_ in rounds
-            }
-        }
-        player_scores["Total"] = sum(player_scores[round_] for round_ in rounds)
-        player_leaderboard.append(player_scores)
-
-    # Create and display player leaderboard dataframe
-    leaderboard_df = pd.DataFrame(player_leaderboard)
-    leaderboard_df = leaderboard_df.sort_values(by="Total", ascending=False)
-    leaderboard_df = leaderboard_df.set_index("Player")
-    st.dataframe(leaderboard_df)
-
-# Tab 3: Team Details
-with tab3:
-    st.subheader("Team Player Scores")
-
-    # Sort teams by total score in descending order
-    sorted_teams = sorted(team_scores, key=lambda x: x["Total Score"], reverse=True)
-
-    # Display each team's table in its own row
-    for team in sorted_teams:
-        st.subheader(f"Team: {team['Team']} (Total Score: {team['Total Score']:.2f})")
-
-        # Add position column and fetch player positions
-        player_df = pd.DataFrame(team["Players"])
-        player_df["Position"] = player_df["Player"].apply(get_player_position)
-
-        # Sort by position and set index
-        player_df["Position_Rank"] = player_df["Position"].apply(
-            lambda x: POSITION_SORT_ORDER.index(x) if x in POSITION_SORT_ORDER else len(POSITION_SORT_ORDER)
-        )
-        player_df = player_df.sort_values(by=["Position_Rank", "Player"]).drop(columns=["Position_Rank"])
-        player_df = player_df.set_index("Position")
-
-        # Display the sorted dataframe
-        st.dataframe(player_df)
-
-# Extract the set of NFL teams dynamically
-nfl_teams = sorted(df_name_mapping["Team"].unique())
-
-# Tab 4: Current NFL Game
-with tab4:
     st.subheader("Current NFL Game Focus")
 
     # Dropdown inputs for NFL teams and round
@@ -257,3 +179,78 @@ with tab4:
         # Set Total as the index
         current_game_df = current_game_df.set_index("Total")
         st.dataframe(current_game_df)
+
+# Tab 2: Team Round Scores (formerly Tab 1)
+with tab2:
+    st.subheader("Team Round Scores")
+    round_scores = []
+    for team in team_scores:
+        team_data = {
+            "Team": team["Team"],
+            **{
+                round_: sum(player[round_] for player in team["Players"])
+                for round_ in rounds
+            },
+            "Total": team["Total Score"]
+        }
+        round_scores.append(team_data)
+
+    # Create and display round scores dataframe
+    round_scores_df = pd.DataFrame(round_scores)
+    round_scores_df = round_scores_df.set_index("Team")
+    round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
+    st.dataframe(round_scores_df)
+
+# Tab 3: Player Leaderboard (formerly Tab 2)
+with tab3:
+    st.subheader("Player Leaderboard")
+
+    # Get a list of all unique players across all teams
+    all_players = []
+    for team in team_scores:
+        all_players.extend([player["Player"] for player in team["Players"]])
+    unique_players = list(set(all_players))
+
+    # Create a leaderboard with scores by round and total
+    player_leaderboard = []
+    for player in unique_players:
+        player_scores = {
+            "Player": player,
+            **{
+                round_: (scores_by_round[round_].get(player, 0) or 0) * MULTIPLIERS[round_]
+                for round_ in rounds
+            }
+        }
+        player_scores["Total"] = sum(player_scores[round_] for round_ in rounds)
+        player_leaderboard.append(player_scores)
+
+    # Create and display player leaderboard dataframe
+    leaderboard_df = pd.DataFrame(player_leaderboard)
+    leaderboard_df = leaderboard_df.sort_values(by="Total", ascending=False)
+    leaderboard_df = leaderboard_df.set_index("Player")
+    st.dataframe(leaderboard_df)
+
+# Tab 4: Team Details (formerly Tab 3)
+with tab4:
+    st.subheader("Team Player Scores")
+
+    # Sort teams by total score in descending order
+    sorted_teams = sorted(team_scores, key=lambda x: x["Total Score"], reverse=True)
+
+    # Display each team's table in its own row
+    for team in sorted_teams:
+        st.subheader(f"Team: {team['Team']} (Total Score: {team['Total Score']:.2f})")
+
+        # Add position column and fetch player positions
+        player_df = pd.DataFrame(team["Players"])
+        player_df["Position"] = player_df["Player"].apply(get_player_position)
+
+        # Sort by position and set index
+        player_df["Position_Rank"] = player_df["Position"].apply(
+            lambda x: POSITION_SORT_ORDER.index(x) if x in POSITION_SORT_ORDER else len(POSITION_SORT_ORDER)
+        )
+        player_df = player_df.sort_values(by=["Position_Rank", "Player"]).drop(columns=["Position_Rank"])
+        player_df = player_df.set_index("Position")
+
+        # Display the sorted dataframe
+        st.dataframe(player_df)
