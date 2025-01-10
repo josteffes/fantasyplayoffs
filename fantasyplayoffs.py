@@ -176,6 +176,7 @@ with tab2:
     leaderboard_df = pd.DataFrame(player_leaderboard)
     leaderboard_df = leaderboard_df.sort_values(by="Total", ascending=False)
     leaderboard_df = leaderboard_df[["Player", "Team", "Wildcard", "Divisional", "Conf_Champ", "Super_Bowl", "Total"]]
+    leaderboard_df = leaderboard_df.set_index("Player")  # Set Player as the index
     st.dataframe(leaderboard_df)
 
 # Tab 3: Team Details
