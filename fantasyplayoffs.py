@@ -98,7 +98,8 @@ for col in df_teams.columns:
     for player in team_players:
         player_round_scores = {}
         for round_ in rounds:
-            round_score = scores_by_round[round_].get(player, 0) * MULTIPLIERS[round_]
+            # Safely handle None values
+            round_score = (scores_by_round[round_].get(player, 0) or 0) * MULTIPLIERS[round_]
             player_round_scores[round_] = round_score
         player_total = sum(player_round_scores.values())
         player_scores.append({"Player": player, **player_round_scores, "Total": player_total})
