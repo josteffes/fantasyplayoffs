@@ -195,9 +195,6 @@ with tab3:
         # Display the sorted dataframe
         st.dataframe(player_df)
 
-### Tab 4: Current NFL Game Code
-
-```python
 # Tab 4: Current NFL Game
 with st.tabs(["Round Scores", "Player Leaderboard", "Team Details", "Current Game"])[3]:
     st.subheader("Current NFL Game Focus")
