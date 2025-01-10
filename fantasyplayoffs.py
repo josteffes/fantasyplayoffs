@@ -83,12 +83,31 @@ def get_player_position(player_name):
     if player_id and player_id in players:
         position = players[player_id].get("position", "Unknown")
         
-        # Assign "DEF" for defense teams (2-3 letter names)
-        if len(player_name) in [2, 3] and player_name.isupper():
+        # Assign "DEF" for players with 2-3 character names
+        if len(player_name) in [2, 3]:
             return "DEF"
         return position
     
     return "Unknown"
+
+# Updated function to fetch scores for correct Lamar Jackson
+def get_scores_for_round(season_type, year, week, player_list):
+    week_stats = stats.get_week_stats(season_type, year, week)
+    scores = {}
+    for player in player_list:
+        player_id = player_names.get(player, None)
+        
+        # Handle correct Lamar Jackson during score lookup
+        if player == "Lamar Jackson":
+            for pid, details in players.items():
+                if details.get("full_name") == "Lamar Jackson" and details.get("position") == "QB":
+                    player_id = pid
+                    break
+        
+        if player_id:
+            player_score = stats.get_player_week_score(week_stats, player_id)
+            scores[player] = player_score['pts_ppr'] if player_score and 'pts_ppr' in player_score else 0
+    return scores
 
 # Tab 1: Team Player Scores
 with tab1:
@@ -104,7 +123,7 @@ with tab1:
         player_df["Position_Rank"] = player_df["Position"].apply(
             lambda x: POSITION_SORT_ORDER.index(x) if x in POSITION_SORT_ORDER else len(POSITION_SORT_ORDER)
         )
-        player_df = player_df.sort_values(by="Position_Rank").drop(columns=["Position_Rank"])
+        player_df = player_df.sort_values(by=["Position_Rank", "Player"]).drop(columns=["Position_Rank"])
 
         # Set the index to "Position"
         player_df = player_df.set_index("Position")
