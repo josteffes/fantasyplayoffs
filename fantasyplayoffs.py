@@ -118,9 +118,9 @@ POSITION_SORT_ORDER = ["QB", "RB", "WR", "TE", "Flex", "DEF", "K"]
 st.title("Fantasy Football Playoff League")
 
 # Tab Layout
-tab1, tab2, tab3 = st.tabs(["Round Scores", "Team Details", "Player Leaderboard"])
+tab1, tab2, tab3 = st.tabs(["Round Scores", "Player Leaderboard", "Team Details"])
 
-# Tab 1: Team Round Scores (previously Tab 2)
+# Tab 1: Team Round Scores
 with tab1:
     st.subheader("Team Round Scores")
     round_scores = []
@@ -141,33 +141,8 @@ with tab1:
     round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
     st.dataframe(round_scores_df)
 
-# Tab 2: Team Details (previously Tab 1)
+# Tab 2: Player Leaderboard (previously Tab 3)
 with tab2:
-    st.subheader("Team Player Scores")
-
-    # Sort teams by total score in descending order
-    sorted_teams = sorted(team_scores, key=lambda x: x["Total Score"], reverse=True)
-
-    # Display each team's table in its own row
-    for team in sorted_teams:
-        st.subheader(f"Team: {team['Team']} (Total Score: {team['Total Score']:.2f})")
-
-        # Add position column and fetch player positions
-        player_df = pd.DataFrame(team["Players"])
-        player_df["Position"] = player_df["Player"].apply(get_player_position)
-
-        # Sort by position and set index
-        player_df["Position_Rank"] = player_df["Position"].apply(
-            lambda x: POSITION_SORT_ORDER.index(x) if x in POSITION_SORT_ORDER else len(POSITION_SORT_ORDER)
-        )
-        player_df = player_df.sort_values(by=["Position_Rank", "Player"]).drop(columns=["Position_Rank"])
-        player_df = player_df.set_index("Position")
-
-        # Display the sorted dataframe
-        st.dataframe(player_df)
-
-# Tab 3: Player Leaderboard
-with tab3:
     st.subheader("Player Leaderboard")
 
     # Get a list of all unique players across all teams
@@ -194,3 +169,28 @@ with tab3:
     leaderboard_df = leaderboard_df.sort_values(by="Total", ascending=False)
     leaderboard_df = leaderboard_df.set_index("Player")
     st.dataframe(leaderboard_df)
+
+# Tab 3: Team Details (previously Tab 2)
+with tab3:
+    st.subheader("Team Player Scores")
+
+    # Sort teams by total score in descending order
+    sorted_teams = sorted(team_scores, key=lambda x: x["Total Score"], reverse=True)
+
+    # Display each team's table in its own row
+    for team in sorted_teams:
+        st.subheader(f"Team: {team['Team']} (Total Score: {team['Total Score']:.2f})")
+
+        # Add position column and fetch player positions
+        player_df = pd.DataFrame(team["Players"])
+        player_df["Position"] = player_df["Player"].apply(get_player_position)
+
+        # Sort by position and set index
+        player_df["Position_Rank"] = player_df["Position"].apply(
+            lambda x: POSITION_SORT_ORDER.index(x) if x in POSITION_SORT_ORDER else len(POSITION_SORT_ORDER)
+        )
+        player_df = player_df.sort_values(by=["Position_Rank", "Player"]).drop(columns=["Position_Rank"])
+        player_df = player_df.set_index("Position")
+
+        # Display the sorted dataframe
+        st.dataframe(player_df)
