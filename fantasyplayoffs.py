@@ -333,7 +333,7 @@ with tab6:
     most_selected_df = selections_df.head(10).set_index("Player")
     st.table(most_selected_df)
 
-    # Least Selected Players (Bottom 10)
-    st.markdown("### Least Selected Players")
-    least_selected_df = selections_df.tail(10).set_index("Player")
+    # Least Selected Players (All with 1 Selection)
+    st.markdown("### Least Selected Players (Selected Once)")
+    least_selected_df = selections_df[selections_df["Selections"] == 1].set_index("Player")
     st.table(least_selected_df)
