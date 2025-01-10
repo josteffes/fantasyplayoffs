@@ -298,15 +298,15 @@ with tab5:
 
     # Offense Scoring Table
     st.markdown("### Offense Scoring")
-    offense_df = pd.DataFrame(list(offense_scoring.items()), columns=["Action", "Points"])
+    offense_df = pd.DataFrame(list(offense_scoring.items()), columns=["Action", "Points"]).set_index("Action")
     st.table(offense_df)
 
     # Kicking Scoring Table
     st.markdown("### Kicking Scoring")
-    kicking_df = pd.DataFrame(list(kicking_scoring.items()), columns=["Action", "Points"])
+    kicking_df = pd.DataFrame(list(kicking_scoring.items()), columns=["Action", "Points"]).set_index("Action")
     st.table(kicking_df)
 
     # Defense/Special Teams Scoring Table
     st.markdown("### Defense/Special Teams Scoring")
-    defense_df = pd.DataFrame(list(defense_scoring.items()), columns=["Action", "Points"])
+    defense_df = pd.DataFrame(list(defense_scoring.items()), columns=["Action", "Points"]).set_index("Action")
     st.table(defense_df)
