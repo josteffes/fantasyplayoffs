@@ -194,3 +194,51 @@ with tab3:
 
         # Display the sorted dataframe
         st.dataframe(player_df)
+
+### Tab 4: Current NFL Game Code
+
+```python
+# Tab 4: Current NFL Game
+with st.tabs(["Round Scores", "Player Leaderboard", "Team Details", "Current Game"])[3]:
+    st.subheader("Current NFL Game Focus")
+
+    # Inputs for the current game
+    col1, col2 = st.columns(2)
+    with col1:
+        selected_team1 = st.text_input("Enter the first NFL team (e.g., SF for 49ers):", "")
+    with col2:
+        selected_team2 = st.text_input("Enter the second NFL team (e.g., KC for Chiefs):", "")
+
+    selected_round = st.selectbox("Select the current round:", rounds, index=0)
+
+    # Filter data for the selected teams and round
+    if selected_team1 and selected_team2:
+        current_game_data = []
+        for team in team_scores:
+            team_name = team["Team"]
+            players = team["Players"]
+
+            # Find the player from each NFL team for the current fantasy team
+            team1_player = next((p for p in players if selected_team1 in df_name_mapping[df_name_mapping['Player'] == p['Player']]['Team'].values), None)
+            team2_player = next((p for p in players if selected_team2 in df_name_mapping[df_name_mapping['Player'] == p['Player']]['Team'].values), None)
+
+            # Calculate current game score
+            curr_game_score = 0
+            if team1_player:
+                curr_game_score += (scores_by_round[selected_round].get(team1_player["Player"], 0) or 0) * MULTIPLIERS[selected_round]
+            if team2_player:
+                curr_game_score += (scores_by_round[selected_round].get(team2_player["Player"], 0) or 0) * MULTIPLIERS[selected_round]
+
+            # Add data to the table
+            current_game_data.append({
+                "Name": team_name,
+                "CurrGame": curr_game_score,
+                "Total": team["Total Score"],
+                selected_team1: team1_player["Player"] if team1_player else "None",
+                selected_team2: team2_player["Player"] if team2_player else "None",
+            })
+
+        # Create and display the dataframe
+        current_game_df = pd.DataFrame(current_game_data)
+        current_game_df = current_game_df.sort_values(by="CurrGame", ascending=False)
+        st.dataframe(current_game_df)
