@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from sleeper_wrapper import Stats, Players
+st.set_page_config(page_title="Fantasy Football Playoff League", layout="wide")
 
 # Load team and name mapping data
 file_path_teams = "Book3.csv"
