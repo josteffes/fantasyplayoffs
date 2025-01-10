@@ -90,7 +90,7 @@ def get_scores_for_round(season_type, year, week, player_list):
 # Fetch scores for all rounds
 rounds = ["Wildcard", "Divisional", "Conf_Champ", "Super_Bowl"]
 scores_by_round = {
-    round_: get_scores_for_round("post", 2023, i + 1, df_teams.values.flatten())
+    round_: get_scores_for_round("regular", 2024, i + 1, df_teams.values.flatten())
     for i, round_ in enumerate(rounds)
 }
 
