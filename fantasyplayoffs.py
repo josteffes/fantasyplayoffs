@@ -9,7 +9,7 @@ df_teams = pd.read_csv(file_path_teams)
 df_name_mapping = pd.read_csv(file_path_name_mapping)
 
 # Preprocess data: Map names using name mapping
-name_mapping = dict(zip(df_name_mapping["Sleeper Name"], df_name_mapping["Custom Name"]))
+name_mapping = dict(zip(df_name_mapping["Form Name"], df_name_mapping["Name"]))
 df_teams = df_teams.applymap(lambda x: name_mapping.get(x, x))
 
 # Fetch player data from Sleeper API
