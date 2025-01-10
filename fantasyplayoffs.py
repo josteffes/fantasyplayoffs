@@ -330,7 +330,12 @@ with tab6:
                 if player == p["Player"]:
                     count += 1
                     selected_by.append(team["Team"])
-        player_selection_counts.append({"Player": player, "Selections": count})
+        player_selection_counts.append({
+            "Player": player,
+            "Selections": count,
+            "NFL Team": df_name_mapping[df_name_mapping["Name"] == player]["Team"].iloc[0]
+            if player in df_name_mapping["Name"].values else "Unknown"
+        })
         if count == 1:  # Track the team if the player is selected only once
             player_selected_by[player] = selected_by[0] if selected_by else "Unknown"
 
@@ -341,11 +346,12 @@ with tab6:
     # Most Selected Players (Top 10)
     st.markdown("### Most Selected Players")
     most_selected_df = selections_df.head(10).set_index("Player")
+    most_selected_df = most_selected_df[["Selections", "NFL Team"]]  # Reorder columns
     st.table(most_selected_df)
 
     # Least Selected Players (All with 1 Selection)
     st.markdown("### Least Selected Players (Selected Once)")
     least_selected_df = selections_df[selections_df["Selections"] == 1]
     least_selected_df["Selected By"] = least_selected_df["Player"].map(player_selected_by)
-    least_selected_df = least_selected_df[["Player", "Selected By"]].set_index("Player")  # Remove "Selections" column
+    least_selected_df = least_selected_df[["NFL Team", "Selected By"]].set_index("Player")  # Reorder columns
     st.table(least_selected_df)
