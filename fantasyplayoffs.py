@@ -218,7 +218,7 @@ with tab3:
 
 # Tab 4: Current NFL Game
 with tab4:
-    st.subheader("Current NFL Game")
+    st.subheader("Current NFL Game Focus")
 
     # Default values for dropdowns
     default_team1 = "Texans"  # Default first NFL team
@@ -229,27 +229,32 @@ with tab4:
     col1, col2 = st.columns(2)
     with col1:
         selected_team1 = st.selectbox(
-            "Select the first NFL team:", 
-            sorted(df_name_mapping["Team"].unique()), 
-            index=sorted(df_name_mapping["Team"].unique()).index(default_team1)
+            "Select the first NFL team:",
+            sorted(df_name_mapping["Team"].unique()),
+            index=sorted(df_name_mapping["Team"].unique()).index(default_team1),
         )
     with col2:
         selected_team2 = st.selectbox(
-            "Select the second NFL team:", 
-            sorted(df_name_mapping["Team"].unique()), 
-            index=sorted(df_name_mapping["Team"].unique()).index(default_team2)
+            "Select the second NFL team:",
+            sorted(df_name_mapping["Team"].unique()),
+            index=sorted(df_name_mapping["Team"].unique()).index(default_team2),
         )
 
     selected_round = st.selectbox(
-        "Select the current round:", 
-        rounds, 
-        index=rounds.index(default_round)
+        "Select the current round:", rounds, index=rounds.index(default_round)
     )
 
     # Filter data for the selected teams and round
     if selected_team1 and selected_team2:
         current_game_data = []
-        player_counts = {}  # Track counts of players from selected teams
+        player_counts = {}  # Track counts and scores of players from selected teams
+
+        # Fetch fresh scores for all rounds
+        scores_by_round = {
+            round_: get_scores_for_round("post", 2023, i + 1, df_teams.values.flatten())
+            for i, round_ in enumerate(rounds)
+        }
+
         for team in team_scores:
             team_name = team["Team"]
             players = team["Players"]
@@ -257,22 +262,29 @@ with tab4:
             # Find the player from each NFL team for the current fantasy team
             team1_player = next(
                 (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team1]["Name"].values),
-                None
+                None,
             )
             team2_player = next(
                 (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team2]["Name"].values),
-                None
+                None,
             )
 
-            # Update player counts
+            # Update player counts and scores
             for player in [team1_player, team2_player]:
-                if player:
+                if player and "Player" in player:
                     player_name = player["Player"]
                     player_team = selected_team1 if player == team1_player else selected_team2
+                    player_score = (scores_by_round[selected_round].get(player_name, 0) or 0) * MULTIPLIERS[selected_round]
+
                     if player_name not in player_counts:
-                        player_counts[player_name] = {"Team": player_team, "Count": 0}
+                        player_counts[player_name] = {
+                            "Team": player_team,
+                            "Count": 0,
+                            "Current Game Score": 0,
+                        }
                     player_counts[player_name]["Count"] += 1
-            
+                    player_counts[player_name]["Current Game Score"] += player_score
+
             # Calculate current game score
             curr_game_score = 0
             if team1_player:
@@ -280,14 +292,16 @@ with tab4:
             if team2_player:
                 curr_game_score += (scores_by_round[selected_round].get(team2_player["Player"], 0) or 0) * MULTIPLIERS[selected_round]
 
-            # Add data to the table
-            current_game_data.append({
-                "Total": team["Total Score"],
-                "Name": team_name,
-                "CurrGame": curr_game_score,
-                selected_team1: team1_player["Player"] if team1_player else "None",
-                selected_team2: team2_player["Player"] if team2_player else "None",
-            })
+            # Add data to the main current game table
+            current_game_data.append(
+                {
+                    "Total": team["Total Score"],
+                    "Name": team_name,
+                    "CurrGame": curr_game_score,
+                    selected_team1: team1_player["Player"] if team1_player else "None",
+                    selected_team2: team2_player["Player"] if team2_player else "None",
+                }
+            )
 
         # Create and display the main current game dataframe
         current_game_df = pd.DataFrame(current_game_data)
@@ -295,7 +309,7 @@ with tab4:
         st.dataframe(current_game_df)
 
         # Create and display the player counts summary table
-        st.markdown("### Player Counts")
+        st.markdown("### Player Counts for Selected Teams")
         player_counts_df = pd.DataFrame.from_dict(player_counts, orient="index")
         player_counts_df.index.name = "Player"
         st.dataframe(player_counts_df)
