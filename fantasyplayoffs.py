@@ -208,14 +208,31 @@ with tab3:
 with tab4:
     st.subheader("Current NFL Game Focus")
 
+    # Default values for dropdowns
+    default_team1 = "KC"  # Default first NFL team
+    default_team2 = "PHI"  # Default second NFL team
+    default_round = "Wildcard"  # Default round
+
     # Dropdown inputs for NFL teams and round
     col1, col2 = st.columns(2)
     with col1:
-        selected_team1 = st.selectbox("Select the first NFL team:", sorted(df_name_mapping["Team"].unique()))
+        selected_team1 = st.selectbox(
+            "Select the first NFL team:", 
+            sorted(df_name_mapping["Team"].unique()), 
+            index=sorted(df_name_mapping["Team"].unique()).index(default_team1)
+        )
     with col2:
-        selected_team2 = st.selectbox("Select the second NFL team:", sorted(df_name_mapping["Team"].unique()))
+        selected_team2 = st.selectbox(
+            "Select the second NFL team:", 
+            sorted(df_name_mapping["Team"].unique()), 
+            index=sorted(df_name_mapping["Team"].unique()).index(default_team2)
+        )
 
-    selected_round = st.selectbox("Select the current round:", rounds, index=0)
+    selected_round = st.selectbox(
+        "Select the current round:", 
+        rounds, 
+        index=rounds.index(default_round)
+    )
 
     # Filter data for the selected teams and round
     if selected_team1 and selected_team2:
@@ -257,7 +274,6 @@ with tab4:
         # Set Total as the index
         current_game_df = current_game_df.set_index("Total")
         st.dataframe(current_game_df)
-
 # Default scoring settings for Sleeper
 offense_scoring = {
     "Passing Yards": "0.04 per yard (1 point per 25 yards)",
