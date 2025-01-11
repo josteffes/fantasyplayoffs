@@ -18,7 +18,7 @@ Eagles Def,PHI,Eagles
 Bills Def,BUF,Bills
 Mike Evans WR,Mike Evans,Bucs
 Justin Tucker K,Justin Tucker,Ravens
-JK dobbins ,J.K. Dobbins,Chargers
+J.K. Dobbins RB,J.K. Dobbins,Chargers
 Mark Andrews TE,Mark Andrews,Ravens
 Ravens Def,BAL,Ravens
 Chris Godwin WR,Chris Godwin,Bucs
@@ -88,3 +88,5 @@ Bo Nix QB,Bo Nix,Broncos
 Cooper Kupp WR,Cooper Kupp,Rams
 Commanders Def,WAS,Commanders
 Zane Gonzalez K,Zane Gonzalez,Commanders
+Lucas Krull TE,Lucas Krull,Broncos
+T.J. Hockenson TE,T.J. Hockenson,Vikings
