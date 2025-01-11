@@ -249,6 +249,7 @@ with tab4:
     # Filter data for the selected teams and round
     if selected_team1 and selected_team2:
         current_game_data = []
+        player_counts = {}  # Track counts of players from selected teams
         for team in team_scores:
             team_name = team["Team"]
             players = team["Players"]
