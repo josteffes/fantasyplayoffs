@@ -204,29 +204,18 @@ with tab3:
         # Display the sorted dataframe
         st.dataframe(player_df)
 
-# Tab 4: Current Game
+# Tab 4: Current NFL Game
 with tab4:
     st.subheader("Current NFL Game Focus")
 
-    # Default values for the dropdowns
-    default_team1 = "Texans"  # Default first NFL team
-    default_team2 = "Chargers"  # Default second NFL team
-    default_round = "Wildcard"  # Default round
-
-    # Inputs for the current game
+    # Dropdown inputs for NFL teams and round
     col1, col2 = st.columns(2)
     with col1:
-        selected_team1 = st.selectbox(
-            "Select the first NFL team:", nfl_teams, index=nfl_teams.index(default_team1)
-        )
+        selected_team1 = st.selectbox("Select the first NFL team:", sorted(df_name_mapping["Team"].unique()))
     with col2:
-        selected_team2 = st.selectbox(
-            "Select the second NFL team:", nfl_teams, index=nfl_teams.index(default_team2)
-        )
+        selected_team2 = st.selectbox("Select the second NFL team:", sorted(df_name_mapping["Team"].unique()))
 
-    selected_round = st.selectbox(
-        "Select the current round:", rounds, index=rounds.index(default_round)
-    )
+    selected_round = st.selectbox("Select the current round:", rounds, index=0)
 
     # Filter data for the selected teams and round
     if selected_team1 and selected_team2:
@@ -237,10 +226,12 @@ with tab4:
 
             # Find the player from each NFL team for the current fantasy team
             team1_player = next(
-                (p for p in players if p["Player"] in player_team_map and player_team_map[p["Player"]] == selected_team1), None
+                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team1]["Name"].values),
+                None
             )
             team2_player = next(
-                (p for p in players if p["Player"] in player_team_map and player_team_map[p["Player"]] == selected_team2), None
+                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team2]["Name"].values),
+                None
             )
 
             # Calculate current game score
@@ -252,16 +243,19 @@ with tab4:
 
             # Add data to the table
             current_game_data.append({
+                "Total": team["Total Score"],
                 "Name": team_name,
                 "CurrGame": curr_game_score,
-                "Total": team["Total Score"],
                 selected_team1: team1_player["Player"] if team1_player else "None",
                 selected_team2: team2_player["Player"] if team2_player else "None",
             })
 
         # Create and display the dataframe
         current_game_df = pd.DataFrame(current_game_data)
-        current_game_df = current_game_df.set_index("Total").sort_index(ascending=False)
+        # Sort by Total in descending order
+        current_game_df = current_game_df.sort_values(by="Total", ascending=False)
+        # Set Total as the index
+        current_game_df = current_game_df.set_index("Total")
         st.dataframe(current_game_df)
 
 # Default scoring settings for Sleeper
