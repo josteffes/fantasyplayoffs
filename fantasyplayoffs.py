@@ -5,7 +5,7 @@ import streamlit as st
 import time
 
 # Auto-refresh settings
-enable_auto_refresh = False  # Set to False to disable auto-refresh
+enable_auto_refresh = True  # Set to False to disable auto-refresh
 refresh_interval_seconds = 30  # Set the refresh interval (in seconds)
 
 # Auto-refresh logic
