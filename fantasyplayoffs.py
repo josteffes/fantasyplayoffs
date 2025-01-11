@@ -115,7 +115,7 @@ for col in df_teams.columns:
 POSITION_SORT_ORDER = ["QB", "RB", "WR", "TE", "Flex", "DEF", "K"]
 
 # Streamlit App
-st.title("Fantasy Football Playoff League")
+st.title("2025 Fantasy Playoff Challenge")
 
 # Define the 14 NFL Playoff Teams
 nfl_teams = [
