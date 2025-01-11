@@ -249,11 +249,11 @@ with tab4:
     # Filter data for the selected teams and round
     if selected_team1 and selected_team2:
         current_game_data = []
-        player_counts = {}  # Track counts of players from selected teams
+        player_counts = {}  # Track counts and individual scores for players from selected teams
 
         # Fetch fresh scores for all rounds
         scores_by_round = {
-            round_: get_scores_for_round("post", 2023, i + 1, df_teams.values.flatten())
+            round_: get_scores_for_round("post", 2024, i + 1, df_teams.values.flatten())
             for i, round_ in enumerate(rounds)
         }
         
@@ -271,7 +271,7 @@ with tab4:
                 None
             )
 
-            # Update player counts and scores
+            # Update player counts and individual scores
             for player in [team1_player, team2_player]:
                 if player and "Player" in player:
                     player_name = player["Player"]
@@ -281,12 +281,12 @@ with tab4:
                     if player_name not in player_counts:
                         player_counts[player_name] = {
                             "Team": player_team,
-                            "Count": 0,
-                            "Current Game Score": 0,
+                            "Count": 1,  # Initialize count as 1
+                            "Current Game Score": player_score,  # Individual score
                         }
-                    player_counts[player_name]["Count"] += 1
-                    player_counts[player_name]["Current Game Score"] += player_score
-            
+                    else:
+                        player_counts[player_name]["Count"] += 1
+
             # Calculate current game score
             curr_game_score = 0
             if team1_player:
@@ -294,7 +294,7 @@ with tab4:
             if team2_player:
                 curr_game_score += (scores_by_round[selected_round].get(team2_player["Player"], 0) or 0) * MULTIPLIERS[selected_round]
 
-            # Add data to the table
+            # Add data to the main current game table
             current_game_data.append({
                 "Total": team["Total Score"],
                 "Name": team_name,
@@ -312,6 +312,7 @@ with tab4:
         st.markdown("### Player Counts")
         player_counts_df = pd.DataFrame.from_dict(player_counts, orient="index")
         player_counts_df.index.name = "Player"
+        player_counts_df = player_counts_df[["Team", "Count", "Current Game Score"]]  # Reorder columns
         st.dataframe(player_counts_df)
 
 
