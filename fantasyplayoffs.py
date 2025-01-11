@@ -250,6 +250,13 @@ with tab4:
     if selected_team1 and selected_team2:
         current_game_data = []
         player_counts = {}  # Track counts of players from selected teams
+
+        # Fetch fresh scores for all rounds
+        scores_by_round = {
+            round_: get_scores_for_round("post", 2023, i + 1, df_teams.values.flatten())
+            for i, round_ in enumerate(rounds)
+        }
+        
         for team in team_scores:
             team_name = team["Team"]
             players = team["Players"]
@@ -264,14 +271,21 @@ with tab4:
                 None
             )
 
-            # Update player counts
+            # Update player counts and scores
             for player in [team1_player, team2_player]:
-                if player:
+                if player and "Player" in player:
                     player_name = player["Player"]
                     player_team = selected_team1 if player == team1_player else selected_team2
+                    player_score = (scores_by_round[selected_round].get(player_name, 0) or 0) * MULTIPLIERS[selected_round]
+
                     if player_name not in player_counts:
-                        player_counts[player_name] = {"Team": player_team, "Count": 0}
+                        player_counts[player_name] = {
+                            "Team": player_team,
+                            "Count": 0,
+                            "Current Game Score": 0,
+                        }
                     player_counts[player_name]["Count"] += 1
+                    player_counts[player_name]["Current Game Score"] += player_score
             
             # Calculate current game score
             curr_game_score = 0
