@@ -6,7 +6,7 @@ import time
 
 # Auto-refresh settings
 enable_auto_refresh = False  # Set to False to disable auto-refresh
-refresh_interval_seconds = 10  # Set the refresh interval (in seconds)
+refresh_interval_seconds = 30  # Set the refresh interval (in seconds)
 
 # Auto-refresh logic
 if enable_auto_refresh:
@@ -218,7 +218,7 @@ with tab3:
 
 # Tab 4: Current NFL Game
 with tab4:
-    st.subheader("Current NFL Game Focus")
+    st.subheader("Current NFL Game")
 
     # Default values for dropdowns
     default_team1 = "Texans"  # Default first NFL team
@@ -295,7 +295,7 @@ with tab4:
         st.dataframe(current_game_df)
 
         # Create and display the player counts summary table
-        st.markdown("### Player Counts for Selected Teams")
+        st.markdown("### Player Counts")
         player_counts_df = pd.DataFrame.from_dict(player_counts, orient="index")
         player_counts_df.index.name = "Player"
         st.dataframe(player_counts_df)
