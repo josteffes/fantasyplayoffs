@@ -263,6 +263,15 @@ with tab4:
                 None
             )
 
+            # Update player counts
+            for player in [team1_player, team2_player]:
+                if player:
+                    player_name = player["Player"]
+                    player_team = selected_team1 if player == team1_player else selected_team2
+                    if player_name not in player_counts:
+                        player_counts[player_name] = {"Team": player_team, "Count": 0}
+                    player_counts[player_name]["Count"] += 1
+            
             # Calculate current game score
             curr_game_score = 0
             if team1_player:
@@ -279,13 +288,18 @@ with tab4:
                 selected_team2: team2_player["Player"] if team2_player else "None",
             })
 
-        # Create and display the dataframe
+        # Create and display the main current game dataframe
         current_game_df = pd.DataFrame(current_game_data)
-        # Sort by Total in descending order
-        current_game_df = current_game_df.sort_values(by="Total", ascending=False)
-        # Set Total as the index
-        current_game_df = current_game_df.set_index("Total")
+        current_game_df = current_game_df.sort_values(by="Total", ascending=False).set_index("Total")
         st.dataframe(current_game_df)
+
+        # Create and display the player counts summary table
+        st.markdown("### Player Counts for Selected Teams")
+        player_counts_df = pd.DataFrame.from_dict(player_counts, orient="index")
+        player_counts_df.index.name = "Player"
+        st.dataframe(player_counts_df)
+
+
 # Default scoring settings for Sleeper
 offense_scoring = {
     "Passing Yards": "0.04 per yard (1 point per 25 yards)",
