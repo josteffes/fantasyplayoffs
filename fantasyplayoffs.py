@@ -1,6 +1,18 @@
 import streamlit as st
 import pandas as pd
 from sleeper_wrapper import Stats, Players
+import streamlit as st
+import time
+
+# Auto-refresh settings
+enable_auto_refresh = False  # Set to False to disable auto-refresh
+refresh_interval_seconds = 10  # Set the refresh interval (in seconds)
+
+# Auto-refresh logic
+if enable_auto_refresh:
+    st.experimental_set_query_params(refresh=str(time.time()))
+    time.sleep(refresh_interval_seconds)
+    st.experimental_rerun()
 
 # Load team and name mapping data
 file_path_teams = "Book3.csv"
