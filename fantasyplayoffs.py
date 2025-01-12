@@ -161,15 +161,17 @@ with tab1:
     rank_map = {1: "1st", 2: "2nd", 3: "3rd"}
     ranks = []
     current_rank = 1
+
     for i in range(len(round_scores_df)):
         if i > 0 and round_scores_df.iloc[i]["Total"] == round_scores_df.iloc[i - 1]["Total"]:
             # Same rank as the previous team for ties
             ranks.append(ranks[-1])
         else:
-            # Assign current rank and skip ranks based on the number of tied teams
+            # Assign current rank
             rank = rank_map.get(current_rank, f"{current_rank}th")
             ranks.append(rank)
-            current_rank += round_scores_df.iloc[:i].value_counts(subset=["Total"]).iloc[-1] if i > 0 else 1
+        # Increment rank based on the number of tied teams
+        current_rank = len(ranks) + 1
 
     round_scores_df.insert(0, "Place", ranks)  # Add Place column at the front
 
