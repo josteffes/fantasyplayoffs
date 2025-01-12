@@ -188,7 +188,7 @@ with tab1:
 
     # Calculate the "Behind 1st" column
     first_place_total = round_scores_df["Total"].iloc[0]
-    round_scores_df["Behind 1st"] = first_place_total - round_scores_df["Total"]
+    round_scores_df["Points Behind"] = first_place_total - round_scores_df["Total"]
 
     # Set the Place column as the index
     round_scores_df = round_scores_df.set_index("Place")
