@@ -166,9 +166,10 @@ with tab1:
             # Same rank as the previous team for ties
             ranks.append(ranks[-1])
         else:
-            # Assign current rank
-            ranks.append(rank_map.get(current_rank, f"{current_rank}th"))
-            current_rank += 1
+            # Assign current rank and skip ranks based on the number of tied teams
+            rank = rank_map.get(current_rank, f"{current_rank}th")
+            ranks.append(rank)
+            current_rank += round_scores_df.iloc[:i].value_counts(subset=["Total"]).iloc[-1] if i > 0 else 1
 
     round_scores_df.insert(0, "Place", ranks)  # Add Place column at the front
 
