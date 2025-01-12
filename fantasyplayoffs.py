@@ -138,6 +138,13 @@ nfl_teams = [
 # Add a new tab for Scoring Settings
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Standings", "Player Scores", "Team Details", "Current Game", "Scoring Settings", "Player Selections"])
 
+# Function to determine the correct suffix for a rank
+def get_rank_suffix(rank):
+    if 10 <= rank % 100 <= 20:  # Special case for 11th, 12th, 13th, etc.
+        return "th"
+    else:
+        return {1: "st", 2: "nd", 3: "rd"}.get(rank % 10, "th")
+
 # Tab 1: Round Scores
 with tab1:
     st.subheader("Standings")
@@ -157,8 +164,7 @@ with tab1:
     round_scores_df = pd.DataFrame(round_scores)
     round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
 
-    # Add a new column for place (rank) with ties handled
-    rank_map = {1: "1st", 2: "2nd", 3: "3rd"}
+    # Add a new column for place (rank) with correct suffix
     ranks = []
     current_rank = 1
 
@@ -167,8 +173,8 @@ with tab1:
             # Same rank as the previous team for ties
             ranks.append(ranks[-1])
         else:
-            # Assign current rank
-            rank = rank_map.get(current_rank, f"{current_rank}th")
+            # Assign current rank with suffix
+            rank = f"{current_rank}{get_rank_suffix(current_rank)}"
             ranks.append(rank)
         # Increment rank based on the number of tied teams
         current_rank = len(ranks) + 1
