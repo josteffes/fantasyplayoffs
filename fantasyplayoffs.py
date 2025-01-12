@@ -155,12 +155,28 @@ with tab1:
 
     # Create and display round scores dataframe
     round_scores_df = pd.DataFrame(round_scores)
-    round_scores_df = round_scores_df.set_index("Team")
     round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
 
-    # Add a new column for place (rank)
+    # Add a new column for place (rank) with ties handled
     rank_map = {1: "1st", 2: "2nd", 3: "3rd"}
-    round_scores_df.insert(0, "Place", [(rank_map.get(i, f"{i}th")) for i in range(1, len(round_scores_df) + 1)])
+    ranks = []
+    current_rank = 1
+    for i in range(len(round_scores_df)):
+        if i > 0 and round_scores_df.iloc[i]["Total"] == round_scores_df.iloc[i - 1]["Total"]:
+            # Same rank as the previous team for ties
+            ranks.append(ranks[-1])
+        else:
+            # Assign current rank
+            ranks.append(rank_map.get(current_rank, f"{current_rank}th"))
+            current_rank += 1
+
+    round_scores_df.insert(0, "Place", ranks)
+
+    # Set "Place" as the new index
+    round_scores_df = round_scores_df.set_index("Place")
+
+    # Drop the Team column as index if not required
+    round_scores_df = round_scores_df.drop(columns=["Team"])
 
     # Display the dataframe
     st.dataframe(round_scores_df)
