@@ -162,7 +162,6 @@ with tab1:
 
     # Create the standings dataframe
     round_scores_df = pd.DataFrame(round_scores)
-    round_scores_df = round_scores_df.set_index("Team")
     round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
 
     # Add the place column
@@ -190,6 +189,9 @@ with tab1:
     # Calculate the "Behind 1st" column
     first_place_total = round_scores_df["Total"].iloc[0]
     round_scores_df["Behind 1st"] = first_place_total - round_scores_df["Total"]
+
+    # Set the Place column as the index
+    round_scores_df = round_scores_df.set_index("Place")
 
     # Display the standings table
     st.dataframe(round_scores_df)
