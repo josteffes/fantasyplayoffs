@@ -170,13 +170,11 @@ with tab1:
             ranks.append(rank_map.get(current_rank, f"{current_rank}th"))
             current_rank += 1
 
-    round_scores_df.insert(0, "Place", ranks)
+    round_scores_df.insert(0, "Place", ranks)  # Add Place column at the front
 
-    # Set "Place" as the new index
+    # Move the Team column to the first position after Place
     round_scores_df = round_scores_df.set_index("Place")
-
-    # Drop the Team column as index if not required
-    round_scores_df = round_scores_df.drop(columns=["Team"])
+    round_scores_df = round_scores_df[["Team"] + [col for col in round_scores_df.columns if col != "Team"]]
 
     # Display the dataframe
     st.dataframe(round_scores_df)
