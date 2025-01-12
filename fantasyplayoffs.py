@@ -250,7 +250,7 @@ with tab4:
     st.subheader("Current NFL Game")
 
     # Default values for dropdowns
-    default_team1 = "Bills" # Default first NFL team
+    default_team1 = "Bills"  # Default first NFL team
     default_team2 = "Broncos"  # Default second NFL team
     default_round = "Wildcard"  # Default round
 
@@ -332,9 +332,32 @@ with tab4:
                 selected_team2: team2_player["Player"] if team2_player else "None",
             })
 
-        # Create and display the main current game dataframe
+        # Create the main current game dataframe
         current_game_df = pd.DataFrame(current_game_data)
-        current_game_df = current_game_df.sort_values(by="Total", ascending=False).set_index("Total")
+        current_game_df = current_game_df.sort_values(by="Total", ascending=False)
+
+        # Add a place column with correct suffixes
+        def get_rank_suffix(rank):
+            if 10 <= rank % 100 <= 20:  # Special case for 11th, 12th, 13th, etc.
+                return "th"
+            else:
+                return {1: "st", 2: "nd", 3: "rd"}.get(rank % 10, "th")
+
+        ranks = []
+        current_rank = 1
+
+        for i in range(len(current_game_df)):
+            if i > 0 and current_game_df.iloc[i]["Total"] == current_game_df.iloc[i - 1]["Total"]:
+                ranks.append(ranks[-1])  # Same rank for ties
+            else:
+                rank = f"{current_rank}{get_rank_suffix(current_rank)}"
+                ranks.append(rank)
+            current_rank = len(ranks) + 1
+
+        current_game_df.insert(0, "Place", ranks)  # Add Place column at the front
+        current_game_df = current_game_df.set_index("Place")  # Set Place as the index
+
+        # Display the updated current game dataframe
         st.dataframe(current_game_df)
 
         # Create and display the player counts summary table
@@ -342,6 +365,7 @@ with tab4:
         player_counts_df = pd.DataFrame.from_dict(player_counts, orient="index")
         player_counts_df.index.name = "Player"
         player_counts_df = player_counts_df[["Team", "Count", "Current Game Score"]]  # Reorder columns
+        player_counts_df = player_counts_df.sort_values(by="Current Game Score", ascending=False)
         st.dataframe(player_counts_df)
 
 
