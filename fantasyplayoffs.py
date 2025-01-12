@@ -140,7 +140,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Standings", "Player Scores", "Tea
 
 # Tab 1: Round Scores
 with tab1:
-    st.subheader("Team Round Scores")
+    st.subheader("Standings")
     round_scores = []
     for team in team_scores:
         team_data = {
@@ -157,6 +157,12 @@ with tab1:
     round_scores_df = pd.DataFrame(round_scores)
     round_scores_df = round_scores_df.set_index("Team")
     round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
+
+    # Add a new column for place (rank)
+    rank_map = {1: "1st", 2: "2nd", 3: "3rd"}
+    round_scores_df.insert(0, "Place", [(rank_map.get(i, f"{i}th")) for i in range(1, len(round_scores_df) + 1)])
+
+    # Display the dataframe
     st.dataframe(round_scores_df)
 
 # Tab 2: Player Scores
