@@ -145,7 +145,7 @@ def get_rank_suffix(rank):
     else:
         return {1: "st", 2: "nd", 3: "rd"}.get(rank % 10, "th")
 
-# Tab 1: Round Scores
+# Tab 1: Standings
 with tab1:
     st.subheader("Standings")
     round_scores = []
@@ -160,32 +160,38 @@ with tab1:
         }
         round_scores.append(team_data)
 
-    # Create and display round scores dataframe
+    # Create the standings dataframe
     round_scores_df = pd.DataFrame(round_scores)
+    round_scores_df = round_scores_df.set_index("Team")
     round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
 
-    # Add a new column for place (rank) with correct suffix
+    # Add the place column
+    def get_rank_suffix(rank):
+        if 10 <= rank % 100 <= 20:  # Special case for 11th, 12th, 13th, etc.
+            return "th"
+        else:
+            return {1: "st", 2: "nd", 3: "rd"}.get(rank % 10, "th")
+
     ranks = []
     current_rank = 1
+    previous_total = None
 
-    for i in range(len(round_scores_df)):
-        if i > 0 and round_scores_df.iloc[i]["Total"] == round_scores_df.iloc[i - 1]["Total"]:
-            # Same rank as the previous team for ties
-            ranks.append(ranks[-1])
+    for i, total in enumerate(round_scores_df["Total"]):
+        if previous_total is not None and total == previous_total:
+            ranks.append(ranks[-1])  # Same rank for ties
         else:
-            # Assign current rank with suffix
             rank = f"{current_rank}{get_rank_suffix(current_rank)}"
             ranks.append(rank)
-        # Increment rank based on the number of tied teams
+        previous_total = total
         current_rank = len(ranks) + 1
 
-    round_scores_df.insert(0, "Place", ranks)  # Add Place column at the front
+    round_scores_df.insert(0, "Place", ranks)
 
-    # Move the Team column to the first position after Place
-    round_scores_df = round_scores_df.set_index("Place")
-    round_scores_df = round_scores_df[["Team"] + [col for col in round_scores_df.columns if col != "Team"]]
+    # Calculate the "Behind 1st" column
+    first_place_total = round_scores_df["Total"].iloc[0]
+    round_scores_df["Behind 1st"] = first_place_total - round_scores_df["Total"]
 
-    # Display the dataframe
+    # Display the standings table
     st.dataframe(round_scores_df)
 
 # Tab 2: Player Scores
