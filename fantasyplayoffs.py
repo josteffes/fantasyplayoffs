@@ -22,7 +22,7 @@ df_name_mapping = pd.read_csv(file_path_name_mapping)
 
 # Preprocess data: Map names using name mapping
 name_mapping = dict(zip(df_name_mapping["Form Name"], df_name_mapping["Name"]))
-df_teams = df_teams.applymap(lambda x: name_mapping.get(x, x))
+df_teams.loc[:, :] = df_teams.applymap(lambda x: name_mapping.get(x, x))
 
 # Fetch player data from Sleeper API
 players_api = Players().get_all_players()
@@ -188,7 +188,7 @@ with tab1:
 
     # Calculate the "Behind 1st" column
     first_place_total = round_scores_df["Total"].iloc[0]
-    round_scores_df["Points Behind"] = first_place_total - round_scores_df["Total"]
+    round_scores_df.loc[:, "Points Behind"] = first_place_total - round_scores_df["Total"]
 
     # Set the Place column as the index
     round_scores_df = round_scores_df.set_index("Place")
@@ -420,17 +420,20 @@ with tab5:
 
     # Offense Scoring Table
     st.markdown("### Offense Scoring")
-    offense_df = pd.DataFrame(list(offense_scoring.items()), columns=["Action", "Points"]).set_index("Action")
+    offense_df = pd.DataFrame(list(offense_scoring.items()), columns=["Action", "Points"])
+    offense_df.set_index("Action", inplace=True)
     st.table(offense_df)
 
     # Kicking Scoring Table
     st.markdown("### Kicking Scoring")
-    kicking_df = pd.DataFrame(list(kicking_scoring.items()), columns=["Action", "Points"]).set_index("Action")
+    kicking_df = pd.DataFrame(list(kicking_scoring.items()), columns=["Action", "Points"])
+    kicking_df.set_index("Action", inplace=True)
     st.table(kicking_df)
 
     # Defense/Special Teams Scoring Table
     st.markdown("### Defense/Special Teams Scoring")
-    defense_df = pd.DataFrame(list(defense_scoring.items()), columns=["Action", "Points"]).set_index("Action")
+    defense_df = pd.DataFrame(list(defense_scoring.items()), columns=["Action", "Points"])
+    defense_df.set_index("Action", inplace=True)
     st.table(defense_df)
 
 # Tab 6: Player Selections
@@ -470,6 +473,6 @@ with tab6:
     # Least Selected Players (All with 1 Selection)
     st.markdown("### Least Selected Players (Selected Once)")
     least_selected_df = selections_df[selections_df["Selections"] == 1]
-    least_selected_df["Selected By"] = least_selected_df["Player"].map(player_selected_by)
+    least_selected_df.loc[:, "Selected By"] = least_selected_df["Player"].map(player_selected_by)
     least_selected_df = least_selected_df[["Player", "NFL Team", "Selected By"]].set_index("Player")
     st.dataframe(least_selected_df)
