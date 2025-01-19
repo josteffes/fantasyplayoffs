@@ -258,8 +258,8 @@ with tab4:
     st.subheader("Current NFL Game")
 
     # Default values for dropdowns
-    default_team1 = "Chiefs"  # Default first NFL team
-    default_team2 = "Texans"  # Default second NFL team
+    default_team1 = "Lions"  # Default first NFL team
+    default_team2 = "Commanders"  # Default second NFL team
     default_round = "Divisional"  # Default round
 
     # Dropdown inputs for NFL teams and round
