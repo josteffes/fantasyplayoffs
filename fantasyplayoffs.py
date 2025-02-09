@@ -259,8 +259,8 @@ with tab4:
 
     # Default values for dropdowns
     default_team1 = "Chiefs"  # Default first NFL team
-    default_team2 = "Bills"  # Default second NFL team
-    default_round = "Conf_Champ"  # Default round
+    default_team2 = "Eagles"  # Default second NFL team
+    default_round = "Super_Bowl"  # Default round
 
     # Dropdown inputs for NFL teams and round
     col1, col2 = st.columns(2)
