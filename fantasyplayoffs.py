@@ -102,7 +102,7 @@ def get_scores_for_round(season_type, year, week, player_list):
 # Fetch scores for all rounds
 rounds = ["Wildcard", "Divisional", "Conf_Champ", "Super_Bowl"]
 scores_by_round = {
-    round_: get_scores_for_round("post", 2024, i + 1, df_teams.values.flatten())
+    round_: get_scores_for_round("regular", 2025, i + 1, df_teams.values.flatten())
     for i, round_ in enumerate(rounds)
 }
 
@@ -127,7 +127,7 @@ for col in df_teams.columns:
 POSITION_SORT_ORDER = ["QB", "RB", "WR", "TE", "Flex", "DEF", "K"]
 
 # Streamlit App
-st.title("2025 Fantasy Playoff Challenge")
+st.title("2026 Fantasy Playoff Challenge")
 
 # Define the 14 NFL Playoff Teams
 nfl_teams = [
@@ -258,9 +258,9 @@ with tab4:
     st.subheader("Current NFL Game")
 
     # Default values for dropdowns
-    default_team1 = "Chiefs"  # Default first NFL team
-    default_team2 = "Eagles"  # Default second NFL team
-    default_round = "Super_Bowl"  # Default round
+    default_team1 = "Packers"  # Default first NFL team
+    default_team2 = "Bears"  # Default second NFL team
+    default_round = "Wildcard"  # Default round
 
     # Dropdown inputs for NFL teams and round
     col1, col2 = st.columns(2)
@@ -290,7 +290,7 @@ with tab4:
 
         # Fetch fresh scores for all rounds
         scores_by_round = {
-            round_: get_scores_for_round("post", 2024, i + 1, df_teams.values.flatten())
+            round_: get_scores_for_round("regular", 2025, i + 1, df_teams.values.flatten())
             for i, round_ in enumerate(rounds)
         }
         
