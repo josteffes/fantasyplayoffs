@@ -459,7 +459,8 @@ with tab6:
                 "Player": player,
                 "Selections": len(selecting_teams),
                 "NFL Team": nfl_team,
-                "Selected By": ", ".join(sorted(selecting_teams))  # optional nice-to-have
+                # Keep it as actual list (much better for exact matching)
+                "Selected_By_List": selecting_teams   # ← list of strings
             })
 
     df_selections = pd.DataFrame(player_selection_counts)
@@ -491,8 +492,8 @@ with tab6:
         highlight_mask &= (df_selections["NFL Team"] == selected_nfl)
 
     if selected_manager != "All":
-        # Check if the manager has this player
-        manager_has_player = df_selections["Selected By"].str.contains(selected_manager, na=False)
+        # Exact match - checks if selected_manager is in the list
+        manager_has_player = df_selections["Selected_By_List"].apply(lambda teams: selected_manager in teams)
         highlight_mask &= manager_has_player
 
     # ── 4. Colors for the bar chart ─────────────────────────────────────────
