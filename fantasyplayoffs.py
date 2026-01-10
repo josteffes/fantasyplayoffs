@@ -279,15 +279,57 @@ with tab4:
 # ── Tab 5: Scoring Settings ──────────────────────────────────────────────────
 with tab5:
     st.subheader("Scoring Settings")
-
+    
+    # Offense Scoring
     st.markdown("### Offense Scoring")
-    st.table(pd.DataFrame(list({
+    offense_scoring = {
         "Passing Yards": "0.04 per yard (1 point per 25 yards)",
         "Passing Touchdowns": "4 points",
-        # ... rest of offense_scoring ...
-    }.items()), columns=["Action", "Points"]).set_index("Action"))
-
-    # (you can do the same for kicking and defense, or keep as is)
+        "Interceptions Thrown": "-1 point",
+        "Rushing Yards": "0.1 per yard (1 point per 10 yards)",
+        "Rushing Touchdowns": "6 points",
+        "Receiving Yards": "0.1 per yard (1 point per 10 yards)",
+        "Receiving Touchdowns": "6 points",
+        "Receptions (PPR)": "1 point",
+        "Fumbles Lost": "-2 points",
+        "2-Point Conversions": "2 points"
+    }
+    offense_df = pd.DataFrame(list(offense_scoring.items()), columns=["Action", "Points"])
+    offense_df.set_index("Action", inplace=True)
+    st.table(offense_df)
+    
+    # Kicking Scoring
+    st.markdown("### Kicking Scoring")
+    kicking_scoring = {
+        "Field Goal 0-39 Yards": "3 points",
+        "Field Goal 40-49 Yards": "4 points",
+        "Field Goal 50+ Yards": "5 points",
+        "Extra Point (PAT)": "1 point"
+    }
+    kicking_df = pd.DataFrame(list(kicking_scoring.items()), columns=["Action", "Points"])
+    kicking_df.set_index("Action", inplace=True)
+    st.table(kicking_df)
+    
+    # Defense/Special Teams Scoring
+    st.markdown("### Defense/Special Teams Scoring")
+    defense_scoring = {
+        "Sacks": "1 point",
+        "Interceptions": "2 points",
+        "Fumble Recoveries": "2 points",
+        "Defensive Touchdowns": "6 points",
+        "Safety": "2 points",
+        "Blocked Kicks": "2 points",
+        "Points Allowed (0)": "10 points",
+        "Points Allowed (1-6)": "7 points",
+        "Points Allowed (7-13)": "4 points",
+        "Points Allowed (14-20)": "1 point",
+        "Points Allowed (21-27)": "0 points",
+        "Points Allowed (28-34)": "-1 point",
+        "Points Allowed (35+)": "-4 points"
+    }
+    defense_df = pd.DataFrame(list(defense_scoring.items()), columns=["Action", "Points"])
+    defense_df.set_index("Action", inplace=True)
+    st.table(defense_df)
 
 # ── Tab 6: Player Selections (FIXED) ─────────────────────────────────────────
 with tab6:
