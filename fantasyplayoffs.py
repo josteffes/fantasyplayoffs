@@ -201,14 +201,16 @@ with tab3:
         pdf = pdf.set_index("Position")
         st.dataframe(pdf)
 
-# ── Tab 4: Current Game ──────────────────────────────────────────────────────
-# (keeping your existing code here - no changes needed for this fix)
+# Tab 4: Current NFL Game
 with tab4:
     st.subheader("Current NFL Game")
-    default_team1 = "Rams"
-    default_team2 = "Panthers"
-    default_round = "Wildcard"
-
+    
+    # Default values for dropdowns
+    default_team1 = "Rams"      # Default first NFL team
+    default_team2 = "Panthers"  # Default second NFL team
+    default_round = "Wildcard"  # Default round
+    
+    # Dropdown inputs for NFL teams and round
     col1, col2 = st.columns(2)
     with col1:
         selected_team1 = st.selectbox(
@@ -222,65 +224,98 @@ with tab4:
             sorted(df_name_mapping["Team"].unique()),
             index=sorted(df_name_mapping["Team"].unique()).index(default_team2)
         )
-
-    selected_round = st.selectbox("Select the current round:", rounds, index=rounds.index(default_round))
-
+    
+    selected_round = st.selectbox(
+        "Select the current round:",
+        rounds,
+        index=rounds.index(default_round)
+    )
+    
+    # Filter data for the selected teams and round
     if selected_team1 and selected_team2:
         current_game_data = []
-        player_counts = {}
-        scores_by_round = {r: get_scores_for_round("post", 2025, i+1, df_teams.values.flatten())
-                          for i, r in enumerate(rounds)}
-
+        player_counts = {}  # Track counts and individual scores
+        
+        # Fetch fresh scores for all rounds (you might want to cache this in future)
+        scores_by_round = {
+            round_: get_scores_for_round("post", 2025, i + 1, df_teams.values.flatten())
+            for i, round_ in enumerate(rounds)
+        }
+       
         for team in team_scores:
-            tname = team["Team"]
+            team_name = team["Team"]
             players = team["Players"]
-
-            t1p = next((p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team1]["Name"].values), None)
-            t2p = next((p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team2]["Name"].values), None)
-
-            for p in [t1p, t2p]:
-                if p and "Player" in p:
-                    pname = p["Player"]
-                    pteam = selected_team1 if p == t1p else selected_team2
-                    pscore = (scores_by_round[selected_round].get(pname, 0) or 0) * MULTIPLIERS[selected_round]
-                    if pname not in player_counts:
-                        player_counts[pname] = {"Team": pteam, "Count": 1, "Current Game Score": pscore}
+            
+            # Find the player from each selected NFL team in this fantasy team
+            team1_player = next(
+                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team1]["Name"].values),
+                None
+            )
+            team2_player = next(
+                (p for p in players if p["Player"] in df_name_mapping[df_name_mapping["Team"] == selected_team2]["Name"].values),
+                None
+            )
+            
+            # Update player counts for summary table
+            for player in [team1_player, team2_player]:
+                if player and "Player" in player:
+                    player_name = player["Player"]
+                    player_team = selected_team1 if player == team1_player else selected_team2
+                    player_score = (scores_by_round[selected_round].get(player_name, 0) or 0) * MULTIPLIERS[selected_round]
+                    
+                    if player_name not in player_counts:
+                        player_counts[player_name] = {
+                            "Team": player_team,
+                            "Count": 1,
+                            "Current Game Score": player_score,
+                        }
                     else:
-                        player_counts[pname]["Count"] += 1
-
-            curr_score = 0
-            if t1p: curr_score += (scores_by_round[selected_round].get(t1p["Player"], 0) or 0) * MULTIPLIERS[selected_round]
-            if t2p: curr_score += (scores_by_round[selected_round].get(t2p["Player"], 0) or 0) * MULTIPLIERS[selected_round]
-
+                        player_counts[player_name]["Count"] += 1
+            
+            # Calculate this fantasy team's score from the selected matchup
+            curr_game_score = 0
+            if team1_player:
+                curr_game_score += (scores_by_round[selected_round].get(team1_player["Player"], 0) or 0) * MULTIPLIERS[selected_round]
+            if team2_player:
+                curr_game_score += (scores_by_round[selected_round].get(team2_player["Player"], 0) or 0) * MULTIPLIERS[selected_round]
+            
+            # Add row to main table
             current_game_data.append({
                 "Total": team["Total Score"],
-                "Name": tname,
-                "CurrGame": curr_score,
-                selected_team1: t1p["Player"] if t1p else "None",
-                selected_team2: t2p["Player"] if t2p else "None",
+                "Name": team_name,
+                "CurrGame": curr_game_score,
+                selected_team1: team1_player["Player"] if team1_player else "None",
+                selected_team2: team2_player["Player"] if team2_player else "None",
             })
-
-        cg_df = pd.DataFrame(current_game_data)
-        cg_df = cg_df.sort_values("Total", ascending=False)
-
+        
+        # Create and sort the main dataframe
+        current_game_df = pd.DataFrame(current_game_data)
+        current_game_df = current_game_df.sort_values(by="Total", ascending=False).reset_index(drop=True)
+        
+        # ── FIXED RANKING: Competition style (1224) ──────────────────────────
         ranks = []
-        curr_rank = 1
-        for i in range(len(cg_df)):
-            if i > 0 and cg_df.iloc[i]["Total"] == cg_df.iloc[i-1]["Total"]:
-                ranks.append(ranks[-1])
-            else:
-                ranks.append(f"{curr_rank}{get_rank_suffix(curr_rank)}")
-                curr_rank += 1
+        current_rank = 1
+        previous_total = None
 
-        cg_df.insert(0, "Place", ranks)
-        cg_df = cg_df.set_index("Place")
-        st.dataframe(cg_df)
-
+        for idx, total in enumerate(current_game_df["Total"]):
+            if idx == 0 or total < previous_total:  # New lower score group → start new rank
+                current_rank = idx + 1
+            ranks.append(f"{current_rank}{get_rank_suffix(current_rank)}")
+            previous_total = total
+        
+        current_game_df.insert(0, "Place", ranks)
+        current_game_df = current_game_df.set_index("Place")
+        
+        # Display main table
+        st.dataframe(current_game_df)
+        
+        # Player counts summary
         st.markdown("### Player Counts")
-        pcdf = pd.DataFrame.from_dict(player_counts, orient="index")
-        pcdf.index.name = "Player"
-        pcdf = pcdf[["Team", "Count", "Current Game Score"]].sort_values("Current Game Score", ascending=False)
-        st.dataframe(pcdf)
+        player_counts_df = pd.DataFrame.from_dict(player_counts, orient="index")
+        player_counts_df.index.name = "Player"
+        player_counts_df = player_counts_df[["Team", "Count", "Current Game Score"]]
+        player_counts_df = player_counts_df.sort_values(by="Current Game Score", ascending=False)
+        st.dataframe(player_counts_df)
 
 # ── Tab 5: Scoring Settings ──────────────────────────────────────────────────
 with tab5:
