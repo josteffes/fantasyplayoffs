@@ -135,30 +135,39 @@ with tab1:
     for team in team_scores:
         team_data = {
             "Team": team["Team"],
-            **{r: sum(p[r] for p in team["Players"]) for r in rounds},
+            **{round_: sum(player[round_] for player in team["Players"])
+               for round_ in rounds},
             "Total": team["Total Score"]
         }
         round_scores.append(team_data)
 
-    df = pd.DataFrame(round_scores)
-    df = df.sort_values("Total", ascending=False)
+    round_scores_df = pd.DataFrame(round_scores)
+    round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
 
-    # Ranks with ties
+    # ── FIXED RANKING LOGIC ────────────────────────────────────────────────
     ranks = []
     current_rank = 1
-    prev = None
-    for total in df["Total"]:
-        if prev is not None and total == prev:
+    previous_total = None
+
+    for total in round_scores_df["Total"]:
+        if previous_total is not None and total == previous_total:
+            # Tie → same rank as previous
             ranks.append(ranks[-1])
         else:
+            # New score group → use current rank
             ranks.append(f"{current_rank}{get_rank_suffix(current_rank)}")
-            current_rank += 1
-        prev = total
+            current_rank += 1  # Only increment when score actually changes
+        previous_total = total
+    # ───────────────────────────────────────────────────────────────────────
 
-    df.insert(0, "Place", ranks)
-    df["Points Behind"] = df["Total"].iloc[0] - df["Total"]
-    df = df.set_index("Place")
-    st.dataframe(df)
+    round_scores_df.insert(0, "Place", ranks)
+
+    # Points behind leader
+    first_place_total = round_scores_df["Total"].iloc[0]
+    round_scores_df["Points Behind"] = first_place_total - round_scores_df["Total"]
+
+    round_scores_df = round_scores_df.set_index("Place")
+    st.dataframe(round_scores_df)
 
 # ── Tab 2: Player Scores ─────────────────────────────────────────────────────
 with tab2:
