@@ -131,6 +131,7 @@ def get_rank_suffix(rank):
 # ── Tab 1: Standings ─────────────────────────────────────────────────────────
 with tab1:
     st.subheader("Standings")
+    
     round_scores = []
     for team in team_scores:
         team_data = {
@@ -142,23 +143,18 @@ with tab1:
         round_scores.append(team_data)
 
     round_scores_df = pd.DataFrame(round_scores)
-    round_scores_df = round_scores_df.sort_values(by="Total", ascending=False)
+    round_scores_df = round_scores_df.sort_values(by="Total", ascending=False).reset_index(drop=True)
 
-    # ── FIXED RANKING LOGIC ────────────────────────────────────────────────
+    # ── CORRECTED RANKING: Competition style (1224) ──────────────────────────
     ranks = []
     current_rank = 1
     previous_total = None
 
-    for total in round_scores_df["Total"]:
-        if previous_total is not None and total == previous_total:
-            # Tie → same rank as previous
-            ranks.append(ranks[-1])
-        else:
-            # New score group → use current rank
-            ranks.append(f"{current_rank}{get_rank_suffix(current_rank)}")
-            current_rank += 1  # Only increment when score actually changes
+    for idx, total in enumerate(round_scores_df["Total"]):
+        if idx == 0 or total < previous_total:  # New lower score → advance rank
+            current_rank = idx + 1  # Rank = position (1-based) at start of group
+        ranks.append(f"{current_rank}{get_rank_suffix(current_rank)}")
         previous_total = total
-    # ───────────────────────────────────────────────────────────────────────
 
     round_scores_df.insert(0, "Place", ranks)
 
@@ -166,8 +162,9 @@ with tab1:
     first_place_total = round_scores_df["Total"].iloc[0]
     round_scores_df["Points Behind"] = first_place_total - round_scores_df["Total"]
 
+    # Final display
     round_scores_df = round_scores_df.set_index("Place")
-    st.dataframe(round_scores_df)
+    st.dataframe(round_scores_df.style.format({col: "{:.1f}" for col in rounds + ["Total", "Points Behind"]}))
 
 # ── Tab 2: Player Scores ─────────────────────────────────────────────────────
 with tab2:
