@@ -437,42 +437,105 @@ with tab5:
     st.table(defense_df)
 
 # Tab 6: Player Selections
+# ── Inside tab6 ──────────────────────────────────────────────────────────────
+
 with tab6:
     st.subheader("Player Selections")
 
-    # Count how many teams selected each player and track selecting team
+    # ── 1. Prepare the base selection data (you already have most of this) ──
     player_selection_counts = []
-    player_selected_by = {}  # Dictionary to track which team selected the player
-
     for player in unique_players:
-        count = 0
-        selected_by = []
+        selecting_teams = []
         for team in team_scores:
             for p in team["Players"]:
                 if player == p["Player"]:
-                    count += 1
-                    selected_by.append(team["Team"])
-        player_selection_counts.append({
-            "Player": player,
-            "Selections": count,
-            "NFL Team": df_name_mapping[df_name_mapping["Name"] == player]["Team"].iloc[0]
-            if player in df_name_mapping["Name"].values else "Unknown"
-        })
-        if count == 1:  # Track the team if the player is selected only once
-            player_selected_by[player] = selected_by[0] if selected_by else "Unknown"
+                    selecting_teams.append(team["Team"])
+        
+        if selecting_teams:  # only include actually selected players
+            nfl_team = df_name_mapping[df_name_mapping["Name"] == player]["Team"].iloc[0] \
+                if player in df_name_mapping["Name"].values else "Unknown"
+            
+            player_selection_counts.append({
+                "Player": player,
+                "Selections": len(selecting_teams),
+                "NFL Team": nfl_team,
+                "Selected By": ", ".join(sorted(selecting_teams))  # optional nice-to-have
+            })
 
-    # Create a DataFrame and sort by selections
-    selections_df = pd.DataFrame(player_selection_counts)
-    selections_df = selections_df.sort_values(by="Selections", ascending=False)
+    df_selections = pd.DataFrame(player_selection_counts)
+    df_selections = df_selections.sort_values("Selections", ascending=False).reset_index(drop=True)
 
-    # Most Selected Players (Top 10)
+    # ── 2. Dropdown filters ─────────────────────────────────────────────────
+    col1, col2 = st.columns(2)
+
+    with col1:
+        all_nfl_teams = sorted(df_selections["NFL Team"].unique())
+        selected_nfl = st.selectbox(
+            "Highlight players from NFL team",
+            ["All"] + all_nfl_teams,
+            index=0
+        )
+
+    with col2:
+        all_managers = sorted(df_teams.columns.tolist())
+        selected_manager = st.selectbox(
+            "Highlight players owned by manager",
+            ["All"] + all_managers,
+            index=0
+        )
+
+    # ── 3. Determine which players to highlight ─────────────────────────────
+    highlight_mask = pd.Series(True, index=df_selections.index)
+
+    if selected_nfl != "All":
+        highlight_mask &= (df_selections["NFL Team"] == selected_nfl)
+
+    if selected_manager != "All":
+        # Check if the manager has this player
+        manager_has_player = df_selections["Selected By"].str.contains(selected_manager, na=False)
+        highlight_mask &= manager_has_player
+
+    # ── 4. Colors for the bar chart ─────────────────────────────────────────
+    colors = ['#4e79a7' if h else '#d3d3d3' for h in highlight_mask]
+
+    # Optional: stronger highlight
+    # colors = ['#e15759' if h else '#cccccc' for h in highlight_mask]
+
+    # ── 5. Create the bar chart ─────────────────────────────────────────────
+    import plotly.express as px
+
+    fig = px.bar(
+        df_selections,
+        x="Player",
+        y="Selections",
+        title="Player Selection Frequency",
+        text="Selections",  # shows number on top of bars
+        color=colors,       # we pass colors directly
+        color_discrete_sequence=colors  # ← important!
+    )
+
+    fig.update_layout(
+        xaxis_title="Player",
+        yaxis_title="Number of fantasy teams that selected this player",
+        xaxis={'categoryorder':'total descending'},  # already sorted but enforce
+        showlegend=False,
+        height=550,
+        margin=dict(l=20, r=20, t=60, b=180),
+        xaxis_tickangle=-45
+    )
+
+    fig.update_traces(
+        textposition='auto',
+        textfont_size=11,
+        marker_line_width=0
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Optional: still show the tables below
     st.markdown("### Most Selected Players")
-    most_selected_df = selections_df.head(10)[["Player", "NFL Team", "Selections"]].set_index("Player")
-    st.dataframe(most_selected_df)
+    st.dataframe(df_selections.head(12)[["Player", "NFL Team", "Selections"]].set_index("Player"))
 
-    # Least Selected Players (All with 1 Selection)
     st.markdown("### Least Selected Players (Selected Once)")
-    least_selected_df = selections_df[selections_df["Selections"] == 1]
-    least_selected_df.loc[:, "Selected By"] = least_selected_df["Player"].map(player_selected_by)
-    least_selected_df = least_selected_df[["Player", "NFL Team", "Selected By"]].set_index("Player")
-    st.dataframe(least_selected_df)
+    once = df_selections[df_selections["Selections"] == 1]
+    st.dataframe(once[["Player", "NFL Team", "Selected By"]].set_index("Player"))
