@@ -290,7 +290,7 @@ with tab4:
 
         # Fetch fresh scores for all rounds
         scores_by_round = {
-            round_: get_scores_for_round("regular", 2025, i + 1, df_teams.values.flatten())
+            round_: get_scores_for_round("post", 2025, i + 1, df_teams.values.flatten())
             for i, round_ in enumerate(rounds)
         }
         
